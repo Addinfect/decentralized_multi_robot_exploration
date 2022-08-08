@@ -1,0 +1,59 @@
+
+name: "Online CI Pipeline"
+# Controls when the workflow will run
+on: workflow_dispatch #push
+  # Triggers the workflow on push or pull request events but only for the main branch
+  #push:
+    #branches: [ main ]
+  #pull_request:
+    #branches: [ main ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: [ubuntu-20.04]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Setup catkin
+        uses: betwo/github-setup-catkin@v1.3.0
+        with:
+          ros-version: 'noetic'
+          workspace: '$GITHUB_WORKSPACE'
+      - name: Build Workspace
+        run: |
+          sudo apt install ros-noetic-move-base
+          pip3 install sklearn
+          echo $ROS_PACKAGE_PATH
+          catkin_make_isolated
+      - name: Set up Results
+        run: |
+            mkdir results
+            touch results/data.csv
+            export ROS_HOME=$PWD/results
+      - name: Run tests
+        run: |
+          source /opt/ros/noetic/setup.sh
+          source devel_isolated/setup.sh
+          export ROS_HOME=$PWD/results
+          export ROS_TEST_RESULTS_DIR=$PWD/results
+          chmod +x src/tests/nodes/demo.py
+          rosnode kill -a
+          # xvfb-run rostest tests demo.test
+        shell: bash {0}
+      - name: Archive test results # workaround: https://github.com/actions/upload-artifact/issues/76
+        run: zip -r results.zip results
+        #working-directory: catkin_ws
+      - name: Upload test results
+        uses: actions/upload-artifact@v2
+        with:
+          path: results.zip
+          
+          
+
+        #working-directory: '$GITHUB_WORKSPACE'
