@@ -237,7 +237,9 @@ class RobotAssigner(object):
 			# Calculate weight matrix
 			#weight_matrix = self.calculate_weight_matrix(constant_frontiers)
 			# Calculate Hungarian, result --> (robot_index, goal)
-			random_results = random.shuffle([0,1,2])
+			random_results = [0,1,2]
+			random.shuffle(random_results)
+			rospy.loginfo_once("random: %s",str(random.shuffle(random_results)))
 
 			robot_result = [item \
 				for item in random_results if item[0] == self.robot_number]			
@@ -269,8 +271,8 @@ class RobotAssigner(object):
 				current_position = self.robots[self.robot_number].getPosition()
 				if (self.Euclidean_distance(
 					start_position, current_position) < 0.2 and 
-					(time.time() - start_time) > 4.0): 
-					# Robot in the same position for 4 seconds
+					(time.time() - start_time) > 8.0): 
+					# Robot in the same position for 8 seconds
 					print ('Robot ', self.robot_number, 'is not moving.')
 					# Rememeber the point to delete in the next iteration
 					self.move_base_error_point[robot_index] = goal_position
@@ -281,7 +283,7 @@ class RobotAssigner(object):
 
 				# Generally, if the robot needs more than 10 seconds to 
 				# reach the goal, delete that goal
-				if (time.time() - start_time_timer) > 60.0:
+				if (time.time() - start_time_timer) > 120.0:
 					self.move_base_error_point[robot_index] = goal_position
 					print ("MORE THAN 60 SECONDS!")
 					break

@@ -21,7 +21,7 @@ TrajectoryPlannerROS:
   min_turning_radius: 0.0
   pdist_scale: 11.8
   g_dist: 0.6
-  occdist_scale: 0.1
+  occdist_scale: 0.01
 
   heading_lookahead: 0.325
  

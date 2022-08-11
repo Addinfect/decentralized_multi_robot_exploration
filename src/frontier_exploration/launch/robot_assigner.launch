@@ -8,7 +8,7 @@
   <param name="map_topic" value="/map"/>
   <param name="info_radius" value="0.1"/> 
   <param name="frontiers_topic" value="/filtered_frontiers"/> 
-  <param name="n_robots" value="2"/>
+  <param name="n_robots" value="3"/>
   <param name="delay_after_assignement" value="0.2"/>
   <param name="rate" value="1"/>
   <param name="robot_number" value="$(arg robot_index)"/>

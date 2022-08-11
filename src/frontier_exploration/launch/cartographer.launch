@@ -1,5 +1,6 @@
 <launch>
   <arg name="bag" default="" />
+  <param name="/use_sim_time" value="true"/>
 
   <node name="cartographer_node" pkg="cartographer_ros"
       type="cartographer_node" args="-start_trajectory_with_default_topics=false
