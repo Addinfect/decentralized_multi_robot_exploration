@@ -4,20 +4,13 @@
   
   <include file="$(find frontier_exploration )/launch/cartographer.launch"/>
   
-  <include file="$(find frontier_exploration )/launch/add_trajectory.launch">
-  	<arg name="robot_name" value="robot_0"/>
-  </include>
-  
-  <include file="$(find frontier_exploration )/launch/add_trajectory.launch">
-  	<arg name="robot_name" value="robot_1"/>
-  </include>
-  
-  <!--include file="$(find frontier_exploration )/launch/add_trajectory.launch">
-  	<arg name="robot_name" value="robot_2"/>
-  </include-->
-  
-  <include file="$(find frontier_exploration )/launch/multi_robot_navigation.launch"/>
-  
+  <!-- move base will be started over this script bacause the launch files need a spesific order, 
+  wich can`t be garanteed in a launch file-->
+  <node pkg="frontier_exploration"
+          type="start_movebase.bash" name="start_movebase"
+          output="screen"
+          />
+        
   <include file="$(find frontier_exploration )/launch/filter.launch"/>
 
   <include file="$(find frontier_exploration )/launch/multi_robot_assigner.launch"/>
