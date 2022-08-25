@@ -237,14 +237,9 @@ class RobotAssigner(object):
 			# Calculate weight matrix
 			#weight_matrix = self.calculate_weight_matrix(constant_frontiers)
 			# Calculate Hungarian, result --> (robot_index, goal)
-			random_results = [0,1,2]
-			random.shuffle(random_results)
-			rospy.loginfo_once("random: %s",str(random.shuffle(random_results)))
-
-			robot_result = [item \
-				for item in random_results if item[0] == self.robot_number]			
-			robot_index, goal_index = robot_result[0]				
-			point_to_send = constant_frontiers.points[goal_index]
+		
+			
+			point_to_send = constant_frontiers.points[random.randrange(len(constant_frontiers.points))]
 			# Send robot to the goal
 			self.robots[self.robot_number].sendGoal(point_to_send)
 			rospy.loginfo("Robot_" + str(self.robot_number) +

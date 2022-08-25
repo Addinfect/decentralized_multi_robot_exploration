@@ -1,19 +1,31 @@
 
 <launch>
   <env name='ROBOT_NAME' value="pioneer"/>
+  <param name="/use_sim_time" value="true" />
+
+  <arg name='world_name' default="pioneer3dx-sick.world"/>
+  <arg name='number_robots' value="3"/>
+  <arg name='explore_algorithm' value="Stupid"/>
+
   
-  <include file="$(find frontier_exploration )/launch/cartographer.launch"/>
+  <include file="$(find frontier_exploration )/launch/cartographer.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+  </include>
   
   <!-- move base will be started over this script bacause the launch files need a spesific order, 
   wich can`t be garanteed in a launch file-->
   <node pkg="frontier_exploration"
           type="start_movebase.bash" name="start_movebase"
           output="screen"
+          args="$(arg number_robots)"
           />
         
-  <include file="$(find frontier_exploration )/launch/filter.launch"/>
+  <include file="$(find frontier_exploration )/launch/filter.launch">
+    <arg name="number_robots" value="$(number_robots)"/>
+  </include>
 
-  <include file="$(find frontier_exploration )/launch/multi_robot_assigner.launch"/>
-
+  <include file="$(find frontier_exploration )/launch/multi_robot_assigner.launch">
+    <arg name="assign_algo" value="$(arg explore_algorithm)"/>
+  </include>
 </launch>
 

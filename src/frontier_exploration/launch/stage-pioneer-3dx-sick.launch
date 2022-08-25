@@ -6,6 +6,7 @@
   <arg name="HokuyoLaser" value="0"/>
   <arg name="SICKLMSLaser" value="1"/>
   <arg name="P2OS_Driver" value="1"/>
+  <arg name="world_name" default="pioneer3dx-sick.world"/>
   <param name="includeFile" value="$(find frontier_exploration)/stage-worlds/pioneer3dx-sick.world" type="str" /> 
 
   <!--include file="$(find decentralised_multi_robot_exploration)/launch/robot_state_publisher.launch"/>-->
@@ -15,7 +16,7 @@
   </group>
 
   <group if="$(arg SICKLMSLaser)">
-  	<node pkg="stage_ros_private" type="stageros" name="stageros" args="$(find frontier_exploration)/stage-worlds/pioneer3dx-sick.world" />
+  	<node pkg="stage_ros_private" type="stageros" name="stageros" args="$(find frontier_exploration)/stage-worlds/$(arg world_name)" />
   </group>
   
 </launch>

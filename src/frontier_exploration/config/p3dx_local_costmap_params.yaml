@@ -7,7 +7,7 @@ local_costmap:
 
   footprint_padding: 0.02
   #Cost function parameters
-  inflation_radius: 1.5
+  inflation_radius: 1
   cost_scaling_factor: 3.0
   #We'll publish the voxel grid used by this costmap
   publish_voxel_map: true

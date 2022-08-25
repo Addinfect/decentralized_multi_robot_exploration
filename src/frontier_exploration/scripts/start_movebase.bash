@@ -3,13 +3,15 @@
 # just print this out
 echo "Start add trajectories"
 
-ROBOT_NAME=robot_0 roslaunch frontier_exploration add_trajectory.launch
+for ((c=0; c<$1; c++))
+do
+    echo "Start trajectory for Robot_"$c
+    ROBOT_NAME=robot_$c roslaunch frontier_exploration add_trajectory.launch
+    roslaunch frontier_exploration navigation.launch robot_name:="robot_$c" &>/dev/null &
+done
 
-ROBOT_NAME=robot_1 roslaunch frontier_exploration add_trajectory.launch
 
-ROBOT_NAME=robot_2 roslaunch frontier_exploration add_trajectory.launch
-
-roslaunch frontier_exploration multi_robot_navigation.launch
+#roslaunch frontier_exploration multi_robot_navigation.launch
 
 # exit gracefully by returning a status 
 exit 0
