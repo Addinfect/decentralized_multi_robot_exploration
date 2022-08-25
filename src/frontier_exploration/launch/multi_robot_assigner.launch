@@ -7,7 +7,7 @@
       <arg name="robot_index" value="0"/>
       <arg name="file_name" value="decent_robot_assigner.py" />
       </include>
-    </goup>
+    </group>
 
     <group if="$(eval number_robots > 1)">
       <include file="$(find frontier_exploration)/launch/robot_assigner.launch">

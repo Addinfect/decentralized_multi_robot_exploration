@@ -5,9 +5,9 @@
 
   <arg name='world_name' default="pioneer3dx-sick.world"/>
   <arg name='number_robots' value="3"/>
-  <arg name='explore_algorithm' value="Stupid"/>
+  <arg name='explore_algorithm' value="Hungarian"/> <!-- Stupid | Hungarian-->
+  <arg name='with_gui' default="true"/> <!--extend to Stage with arg -g (no gui)-->
 
-  
   <include file="$(find frontier_exploration )/launch/cartographer.launch">
     <arg name="world_name" value="$(arg world_name)"/>
   </include>
@@ -21,11 +21,14 @@
           />
         
   <include file="$(find frontier_exploration )/launch/filter.launch">
-    <arg name="number_robots" value="$(number_robots)"/>
+    <arg name="number_robots" value="$(arg number_robots)"/>
   </include>
 
   <include file="$(find frontier_exploration )/launch/multi_robot_assigner.launch">
     <arg name="assign_algo" value="$(arg explore_algorithm)"/>
   </include>
+  <group if="$(eval with_gui)">
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find frontier_exploration)/rviz/navigation.rviz"/>
+  </group>
 </launch>
 
