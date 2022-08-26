@@ -27,7 +27,7 @@ jobs:
           workspace: '$GITHUB_WORKSPACE'
       - name: Build Workspace
         run: |
-          sudo apt install ros-noetic-move-base
+          apt install ros-noetic-move-base
           pip3 install sklearn
           echo $ROS_PACKAGE_PATH
           catkin_make_isolated
