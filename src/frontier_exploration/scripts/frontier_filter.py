@@ -20,6 +20,7 @@ class Filter(object):
     def __init__(self):
         # Initialize all parameters 
         # Get the frontier points
+        rospy.loginfo("FrontierFilter Init stated")
         rospy.Subscriber("/frontier_marker", MarkerArray, self.frontier_callback)
         self.frontier_pub = rospy.Publisher('filtered_frontiers', PointArray, queue_size = 1000)
         self.marker_pub = rospy.Publisher('/filtered_markers', Marker, queue_size = 1000)
@@ -41,6 +42,8 @@ class Filter(object):
         self.points_clust.color.g = 1
         self.points_clust.color.a = 1
         self.points_clust.lifetime = rospy.Duration()
+        self.frontier_list = [] # List of all frontier points 
+        rospy.loginfo("FrontierFilter Init finished")
         
     def frontier_callback(self, marker_array):
         # Callback for the unfiltered frontier points
