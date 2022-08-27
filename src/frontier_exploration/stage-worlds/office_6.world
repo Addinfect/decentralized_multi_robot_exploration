@@ -237,7 +237,7 @@ define sicklaser ranger
   # laser-specific properties
   # factory settings for LMS200 
   sensor(
-    range [ 0.0 20.0 ]
+    range [ 0.0 5.0 ]
     fov 365.0
     samples 1081
   )
@@ -314,6 +314,32 @@ pioneer3dx
   #can refer to the robot by this name
   name "pioneer2"
   pose [-12.400 1.413 0.000 41.469] 
+
+  fancysicklaser(color "blue")
+)
+
+pioneer3dx
+(		  
+  #can refer to the robot by this name
+  name "pioneer3"
+  pose [5.0 7.0 0.000 41.469] 
+
+  fancysicklaser(color "blue")
+)
+pioneer3dx
+(		  
+  #can refer to the robot by this name
+  name "pioneer4"
+  pose [-5.0 7.0 0.000 41.469] 
+
+  fancysicklaser(color "blue")
+)
+
+pioneer3dx
+(		  
+  # can refer to the robot by this name
+  name "pioneer5"
+  pose [12.093 3.561 0.000 48.144] 
 
   fancysicklaser(color "blue")
 )

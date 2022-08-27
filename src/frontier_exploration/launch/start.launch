@@ -4,8 +4,9 @@
   <param name="/use_sim_time" value="true" />
 
   <!-- Simulation Parameters-->
-  <arg name='number_robots' value="6"/>
-  <arg name='world_name' default="belgioioso_$(arg number_robots).world"/> <!-- belgioioso_.world | office_.world-->
+  <arg name='number_robots' default="6"/>
+  <arg name='world' default="belgioioso"/>
+  <arg name='world_name' value="$(arg world)_$(arg number_robots).world"/> <!-- belgioioso_.world | office_.world-->
   <arg name='explore_algorithm' value="Hungarian"/> <!-- Stupid | Hungarian-->
   <arg name='with_gui' default="true"/> <!--extend to Stage with arg -g (no gui)-->
 
