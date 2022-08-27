@@ -3,11 +3,13 @@
   <env name='ROBOT_NAME' value="pioneer"/>
   <param name="/use_sim_time" value="true" />
 
-  <arg name='world_name' default="pioneer3dx-sick.world"/>
-  <arg name='number_robots' value="3"/>
+  <!-- Simulation Parameters-->
+  <arg name='number_robots' value="6"/>
+  <arg name='world_name' default="belgioioso_$(arg number_robots).world"/> <!-- belgioioso_.world | office_.world-->
   <arg name='explore_algorithm' value="Hungarian"/> <!-- Stupid | Hungarian-->
   <arg name='with_gui' default="true"/> <!--extend to Stage with arg -g (no gui)-->
 
+  <!-- Starting the Nodes-->
   <include file="$(find frontier_exploration )/launch/cartographer.launch">
     <arg name="world_name" value="$(arg world_name)"/>
   </include>
@@ -26,6 +28,7 @@
 
   <include file="$(find frontier_exploration )/launch/multi_robot_assigner.launch">
     <arg name="assign_algo" value="$(arg explore_algorithm)"/>
+    <arg name="number_robots" value="$(arg number_robots)"/>
   </include>
   <group if="$(eval with_gui)">
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find frontier_exploration)/rviz/navigation.rviz"/>

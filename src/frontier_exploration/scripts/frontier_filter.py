@@ -119,7 +119,7 @@ class Filter(object):
         while not rospy.is_shutdown():
             # Wait for markers to be received
             self.wait_for_frontiers()
-            #rospy.loginfo("Waiting for frontier points.")
+            rospy.loginfo("Waiting for frontier points.")
             
             frontier_list_main = copy.deepcopy(self.frontier_list)
             # Call filter
