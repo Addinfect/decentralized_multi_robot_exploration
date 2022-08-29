@@ -1,0 +1,4 @@
+simulation:
+  world_name: base_footprint
+  number_robots: 3
+  explor_algorithm: Stupid
