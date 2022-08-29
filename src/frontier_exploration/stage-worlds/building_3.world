@@ -305,7 +305,7 @@ pioneer3dx
 (		  
   # can refer to the robot by this name
   name "pioneer1"
-  pose [8.00 -4.511 0.000 37.923]
+  pose [0.5 0.5 0.000 37.923]
 
   fancysicklaser(color "blue")
 )
@@ -313,7 +313,7 @@ pioneer3dx
 (		  
   #can refer to the robot by this name
   name "pioneer2"
-  pose [-12.400 1.413 0.000 41.469] 
+  pose [-0.5 -0.5 0.000 41.469] 
 
   fancysicklaser(color "blue")
 )
