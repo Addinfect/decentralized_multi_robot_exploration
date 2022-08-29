@@ -1,0 +1,3 @@
+[submodule "src/cartographer/scripts/ceres-solver"]
+	path = src/cartographer/scripts/ceres-solver
+	url = https://ceres-solver.googlesource.com/ceres-solver
