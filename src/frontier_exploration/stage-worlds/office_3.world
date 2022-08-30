@@ -213,7 +213,7 @@ define pioneer3dx pioneer_base
 # configure the GUI window
 window
 (
-  size [ 1853 1170 ] # in pixels
+  size [ 1240 1080 ] # in pixels
   scale 47.074 #37.481   # pixels per meter
   #scale 12.0402
   center [ 0.736  -0.286 ]
@@ -227,7 +227,7 @@ window
 floorplan
 ( 
   name "campus"
-  size [30.000 20.000 0.500]
+  size [20.000 12.000 0.500]
   pose [0.000 0.000 0.000 1.570]
   bitmap "Office.png"
 )
@@ -237,9 +237,9 @@ define sicklaser ranger
   # laser-specific properties
   # factory settings for LMS200 
   sensor(
-    range [ 0.0 20.0 ]
-    fov 365.0
-    samples 1081
+    range [ 0.0 10.0 ]
+    fov 270.0
+    samples 512
   )
 
   #samples 90 # still useful but much faster to compute
@@ -297,7 +297,7 @@ pioneer3dx
 (		  
   # can refer to the robot by this name
   name "pioneer0"
-  pose [8.093 0.561 0.000 48.144] 
+  pose [5.093 0.0 0.000 48.144] 
 
   fancysicklaser(color "blue")
 )
@@ -305,7 +305,7 @@ pioneer3dx
 (		  
   # can refer to the robot by this name
   name "pioneer1"
-  pose [8.00 -4.511 0.000 37.923]
+  pose [6.00 -4.0 0.000 37.923]
 
   fancysicklaser(color "blue")
 )
@@ -313,11 +313,11 @@ pioneer3dx
 (		  
   #can refer to the robot by this name
   name "pioneer2"
-  pose [-12.400 1.413 0.000 41.469] 
+  pose [-7.400 1.413 0.000 41.469] 
 
   fancysicklaser(color "blue")
 )
 
-interval_sim 100
+interval_sim 50
 
 

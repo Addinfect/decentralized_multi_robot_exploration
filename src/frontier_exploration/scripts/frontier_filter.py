@@ -34,7 +34,7 @@ class Filter(object):
         self.distance_threshold = rospy.get_param('~distance_threshold')
         #visualization marker
         self.points_clust = Marker()
-        self.points_clust.header.frame_id = self.map_topic
+        self.points_clust.header.frame_id = 'map'#self.map_topic
         self.points_clust.header.stamp = rospy.Time.now()    
         self.points_clust.type = Marker.POINTS
         self.points_clust.scale.x = 0.2

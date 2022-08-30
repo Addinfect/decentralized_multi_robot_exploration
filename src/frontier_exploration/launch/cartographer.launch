@@ -1,6 +1,8 @@
 <launch>
   <arg name="bag" default="" />
   <arg name="world_name" default="pioneer3dx-sick.world"/>
+  <arg name="with_gui" default="true" />
+
   <param name="/use_sim_time" value="true"/>
 
   <node name="cartographer_node" pkg="cartographer_ros"
@@ -15,5 +17,7 @@
 
   <include file="$(find frontier_exploration)/launch/stage-pioneer-3dx-sick.launch">
     <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="with_gui" value="$(arg with_gui)" />
+
   </include>
 </launch>
