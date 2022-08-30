@@ -27,9 +27,9 @@ jobs:
           workspace: '$GITHUB_WORKSPACE'
       - name: Build Workspace
         run: |
+          echo $ROS_PACKAGE_PATH
           sudo apt install ros-noetic-move-base
           pip3 install sklearn
-          echo $ROS_PACKAGE_PATH
           catkin_make_isolated
       - name: Set up Results
         run: |
@@ -44,7 +44,7 @@ jobs:
           export ROS_TEST_RESULTS_DIR=$PWD/results
           chmod +x src/tests/nodes/demo.py
           rosnode kill -a
-          # xvfb-run rostest tests demo.test
+          xvfb-run rostest tests demo.test
         shell: bash {0}
       - name: Archive test results # workaround: https://github.com/actions/upload-artifact/issues/76
         run: zip -r results.zip results
