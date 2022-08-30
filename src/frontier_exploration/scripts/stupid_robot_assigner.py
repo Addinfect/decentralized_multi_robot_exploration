@@ -238,8 +238,9 @@ class RobotAssigner(object):
 			#weight_matrix = self.calculate_weight_matrix(constant_frontiers)
 			# Calculate Hungarian, result --> (robot_index, goal)
 		
-			
-			point_to_send = constant_frontiers.points[random.randrange(len(constant_frontiers.points))]
+			robot_index = self.robot_number
+			goal_index = random.randrange(len(constant_frontiers.points))
+			point_to_send = constant_frontiers.points[goal_index]
 			# Send robot to the goal
 			self.robots[self.robot_number].sendGoal(point_to_send)
 			rospy.loginfo("Robot_" + str(self.robot_number) +

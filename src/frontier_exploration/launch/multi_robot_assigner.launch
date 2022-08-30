@@ -101,5 +101,56 @@
     </group>
   </group>
 
+  
+  <group if="$(eval assign_algo == 'Burgard')">
+    <group if="$(eval number_robots > 0)">
+      <include file="$(find frontier_exploration)/launch/robot_assigner.launch">
+        <arg name="robot_index" value="0"/>
+        <arg name="file_name" value="Burgard_assigner.py" />
+        <arg name="number_robots" value="$(arg number_robots)"/>
+      </include>
+    </group>
+
+    <group if="$(eval number_robots > 1)">
+      <include file="$(find frontier_exploration)/launch/robot_assigner.launch">
+        <arg name="robot_index" value="1"/>
+        <arg name="file_name" value="Burgard_assigner.py" />
+        <arg name="number_robots" value="$(arg number_robots)"/>
+      </include>
+    </group>
+
+    <group if="$(eval number_robots > 2)">
+      <include file="$(find frontier_exploration)/launch/robot_assigner.launch">
+        <arg name="robot_index" value="2"/>
+        <arg name="file_name" value="Burgard_assigner.py" />
+        <arg name="number_robots" value="$(arg number_robots)"/>
+      </include>
+    </group>
+
+    <group if="$(eval number_robots > 3)">
+      <include file="$(find frontier_exploration)/launch/robot_assigner.launch">
+        <arg name="robot_index" value="3"/>
+        <arg name="file_name" value="Burgard_assigner.py" />
+        <arg name="number_robots" value="$(arg number_robots)"/>
+      </include>
+    </group>
+
+    <group if="$(eval number_robots > 4)">
+      <include file="$(find frontier_exploration)/launch/robot_assigner.launch">
+        <arg name="robot_index" value="4"/>
+        <arg name="file_name" value="Burgard_assigner.py" />
+        <arg name="number_robots" value="$(arg number_robots)"/>
+      </include>
+    </group>
+
+    <group if="$(eval number_robots > 5)">
+      <include file="$(find frontier_exploration)/launch/robot_assigner.launch">
+        <arg name="robot_index" value="5"/>
+        <arg name="file_name" value="Burgard_assigner.py" />
+        <arg name="number_robots" value="$(arg number_robots)"/>
+      </include>
+    </group>
+  </group>
+
 </launch>
 
