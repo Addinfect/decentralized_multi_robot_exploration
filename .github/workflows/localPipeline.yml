@@ -28,6 +28,7 @@ jobs:
       - name: Build Workspace
         run: |
           echo $ROS_PACKAGE_PATH
+          sudo apt install ros-noetic-move-base
           pip3 install sklearn
           catkin_make_isolated
       - name: Set up Results
