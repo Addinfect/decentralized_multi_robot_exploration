@@ -318,6 +318,6 @@ pioneer3dx
   fancysicklaser(color "blue")
 )
 
-interval_sim 50
+interval_sim 100
 
 
