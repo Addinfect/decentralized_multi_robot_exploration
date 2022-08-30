@@ -301,8 +301,14 @@ pioneer3dx
 
   fancysicklaser(color "blue")
 )
+pioneer3dx
+(		  
+  # can refer to the robot by this name
+  name "pioneer1"
+  pose [4.864 -3.911 0.000 37.923]
 
-
+  fancysicklaser(color "blue")
+)
 interval_sim 100
 
 

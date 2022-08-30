@@ -1,0 +1,33 @@
+<launch>
+    <arg name='number_robots' default="3"/>
+    <arg name='world' default="office"/>
+    <arg name='explore_algorithm' default="Hungarian"/> <!-- Stupid | Hungarian-->
+    <arg name='together' default= "t"/>    <!-- if the robots should start together, parameter must be 't'-->
+
+
+    <node pkg="rosbag" type="record" name="rosbag" args=" -a -o result"/>
+    
+    <!--node name="StageSim" pkg="stage_ros" type="stageros" args="$(find stage_ros)/world/pioneer3dx-sick.world"/--> <!--- "-g" to disable the gui-->
+    <param name="/use_sim_time" value="true" />
+
+    <!-- Start  -->
+    <include file="$(find frontier_exploration )/launch/start.launch">
+        <arg name="world" value="$(arg world)"/>
+        <arg name="number_robots" value="$(arg number_robots)"/>
+        <arg name="explore_algorithm" value="$(arg explore_algorithm)"/>
+        <arg name='together' value= "%(arg together)"/>    <!-- if the robots should start together, parameter must be 't'-->
+
+        <arg name="with_gui" value="false"/>        <!-- No RVIZ-->
+    </include>
+
+    <!-- Start TrackerNode-->
+    <node pkg="tests" type="testTracker.py" name="testTracker" output="screen" />
+    <node pkg="tests" type="resultTracker.py" name="resultTracker" output="screen" />
+
+    <!-- Run Test -->
+    <test test-name="exploration1_test" pkg="tests" type="explore100.py" time-limit="300"/>
+    <!--test test-name="exploration2_test" pkg="tests" type="explore100.py" time-limit="300"/>
+    <test test-name="exploration3_test" pkg="tests" type="explore100.py" time-limit="300"/>
+    <test test-name="exploration4_test" pkg="tests" type="explore100.py" time-limit="300"/>
+    <test test-name="exploration5_test" pkg="tests" type="explore100.py" time-limit="300"/-->
+</launch>

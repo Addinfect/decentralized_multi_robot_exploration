@@ -26,7 +26,7 @@ class TesterClass(unittest.TestCase):
         self.assertTrue(True)
 
     def callback(self, msg):
-        self.message_received = msg.data >= 90  #99.5
+        self.message_received = msg.data >= 97.5
    
 if __name__ == '__main__':
   rostest.rosrun(PKG, NAME, TesterClass, sys.argv)

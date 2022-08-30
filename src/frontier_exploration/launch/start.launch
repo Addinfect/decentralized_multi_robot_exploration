@@ -6,7 +6,8 @@
   <!-- Simulation Parameters-->
   <arg name='number_robots' default="3"/>
   <arg name='world' default="belgioioso"/>
-  <arg name='world_name' value="$(arg world)_$(arg number_robots).world"/> <!-- belgioioso_.world | office_.world-->
+  <arg name='together' default= "t"/>    <!-- if the robots should start together, parameter must be 't'-->
+  <arg name='world_name' value="$(arg world)_$(arg number_robots)t.world"/> <!-- belgioioso_.world | office_.world-->
   <arg name='explore_algorithm' default="Hungarian"/> <!-- Stupid | Hungarian-->
   <arg name='with_gui' default="1"/> <!--extend to Stage with arg -g (no gui)-->
 
@@ -37,6 +38,6 @@
   </group>
 
   <!-- Start ExploringTracker-->
-  <node pkg="tests" type="exploration_tracker.py" name="ExplorationTracker" args="$(arg world)" />
+  <node pkg="tests" type="exploration_tracker.py" name="ExplorationTracker" args="$(arg world) $(arg number_robots)" output="screen" />
 </launch>
 
