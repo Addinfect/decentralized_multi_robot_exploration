@@ -58,7 +58,7 @@ class Filter(object):
     def wait_for_frontiers(self):
         # Wait if frontiers are not received yet
         while len(self.frontier_list) < 1:
-            rospy.loginfo("Empty list.")
+            #rospy.loginfo("Empty list.")
             pass
 
     def frontier_agglomerative_clustering(self, frontier_list):

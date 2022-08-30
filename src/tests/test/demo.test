@@ -8,7 +8,7 @@
 
     <!-- Start  -->
     <include file="$(find frontier_exploration )/launch/start.launch">
-        <arg name="world" value="belgioioso"/>
+        <arg name="world" value="office"/>
         <arg name="number_robots" value="3"/>
         <arg name="explore_algorithm" value="Hungarian"/>
 
@@ -18,10 +18,9 @@
     <!-- Start TrackerNode-->
     <node pkg="tests" type="testTracker.py" name="testTracker" output="screen" />
 
-    <test test-name="lap_time_test" pkg="tests" type="demo.py" time-limit="60"/>
+    <!--test test-name="lap_time_test" pkg="tests" type="demo.py" time-limit="60"/-->
     <!--test test-name="time_test" pkg="tests" type="time.py" time-limit="120"/-->
-    <test test-name="time_test" pkg="tests" type="time.py" time-limit="720" args="600.0"/>
-    <test test-name="simple_navigation_test" pkg="tests" type="simple_navigation.py" time-limit="180"/>
+    <test test-name="exploration100_test" pkg="tests" type="explore100.py" time-limit="900"/>
 
     <!--test test-name="exploration_test" pkg="tests" type="exploration.py" time-limit="120"/-->
 
