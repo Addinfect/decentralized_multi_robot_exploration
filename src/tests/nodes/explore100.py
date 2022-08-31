@@ -14,6 +14,9 @@ class TesterClass(unittest.TestCase):
     
     def __init__(self, *args):
         self.message_received = False
+        self.timestamp = 0
+        self.timestamp_set = False
+        
         rospy.init_node(NAME, anonymous=True)
         super(TesterClass, self).__init__(*args)
 
@@ -27,6 +30,15 @@ class TesterClass(unittest.TestCase):
 
     def callback(self, msg):
         self.message_received = msg.data >= 99.5
+
+        #set Goal Reached after 30 sec after hitting 95.0 %
+        if (not self.message_received and msg.data >= 95.0):
+            if not self.timestamp_set:
+                self.timestamp = rospy.Time.now().to_sec()
+                self.timestamp_set = True
+            if self.timestamp+30 <= rospy.Time.now().to_sec():
+                self.message_received = True
+
    
 if __name__ == '__main__':
   rostest.rosrun(PKG, NAME, TesterClass, sys.argv)
