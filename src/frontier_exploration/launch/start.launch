@@ -8,7 +8,7 @@
   <arg name='world' default="belgioioso"/>
   <arg name='together' default= "t"/>    <!-- if the robots should start together, parameter must be 't'-->
   <arg name='world_name' value="$(arg world)_$(arg number_robots)t.world"/> <!-- belgioioso_.world | office_.world-->
-  <arg name='explore_algorithm' default="Hungarian"/> <!-- Stupid | Hungarian-->
+  <arg name='explore_algorithm' default="Hungarian"/> <!-- Stupid | Hungarian | Auction-->
   <arg name='with_gui' default="1"/> <!--extend to Stage with arg -g (no gui)-->
 
   <!-- Starting the Nodes-->

@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   message_generation
   cartographer_ros
+  tests
 )
 
 find_package(cartographer REQUIRED)
@@ -25,7 +26,8 @@ add_message_files(
   FrontierTF.msg
   InfoList.msg
   RobotPosGoal.msg
-  Auction.msg
+  AuctionInt.msg
+  AuctionFrontier.msg
  
 )
 
