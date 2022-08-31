@@ -25,6 +25,7 @@ add_message_files(
   FrontierTF.msg
   InfoList.msg
   RobotPosGoal.msg
+  Auction.msg
  
 )
 
