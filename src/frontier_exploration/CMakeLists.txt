@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   message_generation
   cartographer_ros
-  tests
+  #tests
 )
 
 find_package(cartographer REQUIRED)

@@ -12,10 +12,11 @@ from hungarian import Hungarian
 from geometry_msgs.msg import Point
 from nav_msgs.msg import OccupancyGrid
 from functions import robot, informationGain
+from std_msgs.msg import Int32
 from frontier_exploration.msg import PointArray, RobotPosGoal, AuctionInt, AuctionFrontier
 from frontier_exploration.srv import RobotService
 
-class RobotAssigner(object):
+class AuctionAssigner(object):
 
 	def __init__(self):
 		# Initialization
@@ -55,17 +56,18 @@ class RobotAssigner(object):
 		self.spare_goals = []
 		self.auctioneer_id = -1
 		self.auction_is_live = False
-		self.auction_points = PointArray()
+		self.auction_points = []
 		self.bids = np.zeros((1,self.n_robots))
 		self.auction_other_robot_stole_auction = False
 		self.bids_initialized = False
+		self.received_bids_count = 0
 
 		rospy.Subscriber("auction/start", AuctionFrontier, self.auction_start_callback)
 		rospy.Subscriber("auction/bids", AuctionInt, self.auction_bids_callback)
 		rospy.Subscriber("auction/results", AuctionInt, self.auction_results_callback)
-		self.pub_start_auction = rospy.Publisher("auction/start", AuctionFrontier, queue_size=10)
-		self.pub_start_bids = rospy.Publisher("auction/bids", AuctionInt, queue_size=10)
-		self.pub_start_results = rospy.Publisher("auction/results", AuctionInt, queue_size=10)
+		self.pub_start_auction = rospy.Publisher("auction/start", AuctionFrontier, queue_size=1000)
+		self.pub_bids = rospy.Publisher("auction/bids", AuctionInt, queue_size=1000)
+		self.pub_results = rospy.Publisher("auction/results", AuctionInt, queue_size=1000)
 
 
 	def map_callback(self, data):
@@ -77,7 +79,11 @@ class RobotAssigner(object):
 
 	def auction_results_callback(self, msg:AuctionInt):
 		# add all Points where i won to the spare goal
-		for id, point in zip(msg.frontier_points,self.auction_points):
+		rospy.loginfo("Receive Result MSG my Robot_ID:" +str(self.robot_number) + str(msg))
+		if not len(self.auction_points):
+			rospy.loginfo("Empty List in auction_points Robot_ID:" +str(self.robot_number))
+			raise ValueError('Empty List in auction_points Robot_ID:' +str(self.robot_number))
+		for id, point in zip(msg.int_array.data,self.auction_points):
 			if id == self.robot_number:
 				self.spare_goals.append(point)
 
@@ -85,16 +91,20 @@ class RobotAssigner(object):
 		self.auctioneer_id = -1
 
 	def auction_bids_callback(self, msg:AuctionInt):
+		rospy.loginfo("Receive Bid MSG my Robot_ID:" +str(self.robot_number) + str(msg))
 		if self.auction_is_live:
 			if not self.bids_initialized:
-				l = len(msg.frontier_points)
+				l = len(msg.int_array.data)
 				self.bids = np.zeros(l,self.n_robots)
 				self.bids_initialized = True
 			#saves all bids from other robots
-			self.bids[msg.trasmittor_id.data] = msg.frontier_points
+			self.bids[msg.trasmittor_id.data] = np.array(msg.int_array.data)
+			self.received_bids_count += 1
+
 
 
 	def auction_start_callback(self, msg:AuctionFrontier):
+		rospy.loginfo("Receive Start MSG my Robot_ID:" +str(self.robot_number) + str(msg))
 		if self.auction_is_live:
 			#check lowest auctioneer number
 			if msg.trasmittor_id.data < self.auctioneer_id:
@@ -104,12 +114,12 @@ class RobotAssigner(object):
 				self.auctioneer_id = msg.trasmittor_id.data
 		self.auction_is_live = True
 		self.auction_points = msg.frontier_points
-		#TODO: calculate and bid on frontiers
+		self.bid_on_points()
 
-	def bin_on_points(self):
+	def bid_on_points(self):
 		bid_msg = AuctionInt()
 		bid_msg.trasmittor_id.data = self.robot_number
-		bid_msg.frontier_points = np.zeros(self.auction_points.shape)
+		bid_msg.int_array.data = np.zeros(self.auction_points.shape)
 		cost = []
 
 		for point in self.auction_points:
@@ -118,7 +128,7 @@ class RobotAssigner(object):
 		min_index = np.argmin(cost)
 		bid_msg.frontier_points[min_index] = 10
 
-		self.pub_start_bids.publish(bid_msg)
+		self.pub_bids.publish(bid_msg)
 
 	def wait_for_frontiers(self):
 		# Wait if frontiers are not received yet
@@ -300,36 +310,32 @@ class RobotAssigner(object):
 				if not self.auction_is_live:
 				#publish winner & results
 					start_msg = AuctionFrontier()
-					start_msg.frontier_points = constant_frontiers
+					start_msg.frontier_points = constant_frontiers.points
 					start_msg.trasmittor_id.data = self.robot_number
+					self.received_bids_count = 0
+					rospy.loginfo("START AUCTION:"+ str(start_msg))
 					self.pub_start_auction.publish(start_msg)
 					self.auctioneer_id = self.robot_number
 					
-					rospy.sleep(2)	#wait for bids
+					rospy.sleep(5.0)	#wait for bids
+					while(self.received_bids_count == 0):
+						pass
 					#check all received bids
 					if not self.auction_other_robot_stole_auction:
-						results = []
+						results = list()
 						for row in self.bids:
 							results.append(row.argmax(axis=0))
-					result_msg = AuctionInt()
-					result_msg.trasmittor_id.data = self.robot_number
-					result_msg.frontier_points = results
-					self.pub_start_results.publish(result_msg)
+
+						result_msg = AuctionInt()
+						result_msg.trasmittor_id.data = self.robot_number
+						result_msg.int_array.data = results
+
+						self.pub_results.publish(result_msg)
 					#auction finished
 					self.bids = np.zeros((1,self.n_robots))
 					self.auction_other_robot_stole_auction = False
 					self.bids_initialized = False
 			
-
-
-
-
-
-
-
-
-
-
 			
 			# set start and goal position
 			robot_index = self.robot_number
@@ -377,7 +383,7 @@ class RobotAssigner(object):
 if __name__ == '__main__':
 	rospy.init_node('Robot_assigner')
 	try:
-		robot_assigner = RobotAssigner()
+		robot_assigner = AuctionAssigner()
 		robot_assigner.run()
 	except rospy.ROSInterruptException:
 		pass
