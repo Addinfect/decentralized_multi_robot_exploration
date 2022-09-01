@@ -6,9 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Robot0_Goal1
-        - /Robot1_Goal1
-        - /Robot4_Path1
       Splitter Ratio: 0.5
     Tree Height: 455
   - Class: rviz/Selection
@@ -63,6 +60,52 @@ Visualization Manager:
       Topic: /map
       Unreliable: false
       Use Timestamp: false
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /filtered_markers
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        map:
+          Value: true
+        robot_0/base_laser_link:
+          Value: true
+        robot_0/base_link:
+          Value: true
+        robot_1/base_laser_link:
+          Value: true
+        robot_1/base_link:
+          Value: true
+        robot_2/base_laser_link:
+          Value: true
+        robot_2/base_link:
+          Value: true
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          robot_0/base_link:
+            robot_0/base_laser_link:
+              {}
+          robot_1/base_link:
+            robot_1/base_laser_link:
+              {}
+          robot_2/base_link:
+            robot_2/base_laser_link:
+              {}
+      Update Interval: 0
       Value: true
     - Alpha: 1
       Buffer Length: 1
@@ -224,66 +267,6 @@ Visualization Manager:
       Topic: /robot_3/move_base/current_goal
       Unreliable: false
       Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /filtered_markers
-      Name: Marker
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/TF
-      Enabled: true
-      Frame Timeout: 15
-      Frames:
-        All Enabled: true
-        map:
-          Value: true
-        robot_0/base_laser_link:
-          Value: true
-        robot_0/base_link:
-          Value: true
-        robot_1/base_laser_link:
-          Value: true
-        robot_1/base_link:
-          Value: true
-        robot_2/base_laser_link:
-          Value: true
-        robot_2/base_link:
-          Value: true
-        robot_3/base_laser_link:
-          Value: true
-        robot_3/base_link:
-          Value: true
-        robot_4/base_laser_link:
-          Value: true
-        robot_4/base_link:
-          Value: true
-      Marker Alpha: 1
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: true
-      Tree:
-        map:
-          robot_0/base_link:
-            robot_0/base_laser_link:
-              {}
-          robot_1/base_link:
-            robot_1/base_laser_link:
-              {}
-          robot_2/base_link:
-            robot_2/base_laser_link:
-              {}
-          robot_3/base_link:
-            robot_3/base_laser_link:
-              {}
-          robot_4/base_link:
-            robot_4/base_laser_link:
-              {}
-      Update Interval: 0
-      Value: true
     - Alpha: 1
       Axes Length: 1
       Axes Radius: 0.10000000149011612
@@ -324,6 +307,94 @@ Visualization Manager:
       Topic: /robot_4/move_base/TrajectoryPlannerROS/global_plan
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 78; 154; 6
+      Enabled: true
+      Head Length: 0.10000000149011612
+      Head Radius: 0.10000000149011612
+      Name: Robot5_Goal
+      Queue Size: 10
+      Shaft Length: 0.30000001192092896
+      Shaft Radius: 0.30000001192092896
+      Shape: Arrow
+      Topic: /robot_5/move_base/current_goal
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 78; 154; 6
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Robot5_Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /robot_5/move_base/TrajectoryPlannerROS/global_plan
+      Unreliable: false
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /robot_0/spare_goals
+      Name: Robot0_SpareGoals
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /robot_1/spare_goals
+      Name: Robot1_SpareGoals
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /robot_2/spare_goals
+      Name: Robot2_SpareGoals
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: false
+      Marker Topic: /filtered_markers
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/Marker
+      Enabled: false
+      Marker Topic: /filtered_markers
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/Marker
+      Enabled: false
+      Marker Topic: /filtered_markers
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -388,5 +459,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1386
-  X: 1415
-  Y: 77
+  X: 1414
+  Y: 27
