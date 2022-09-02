@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rospy, sys, math
+import rospy, sys, math, csv, os
 import numpy as np
 from std_msgs.msg import Float32, Float32MultiArray
 from nav_msgs.msg import OccupancyGrid, Odometry
@@ -11,15 +11,16 @@ class Exploration_Tracker():
     def __init__(self, argv, argc):
         rospy.init_node("Exploration_Tracker", anonymous=True)
         print(argv)
-        worldname = argv[1]
+        self.worldname = argv[1]
         self.num_Robots = int(argv[2])
+        self.algorithmus = argv[3]
         self.exploring_size = 0
         self.explored_cells = 0
-        if worldname == "belgioioso":
+        if self.worldname == "belgioioso":
             self.exploring_size = 68245
-        elif worldname == "office":
+        elif self.worldname == "office":
             self.exploring_size = 86729
-        elif worldname == "building":
+        elif self.worldname == "building":
             self.exploring_size = 240000
 
 
@@ -34,6 +35,11 @@ class Exploration_Tracker():
             self.old_points.append((0.0,0.0))
         self.exploration_pub = rospy.Publisher('exploration_percentage', Float32, queue_size = 10)
         self.distance_pub = rospy.Publisher('traveled_distance', Float32MultiArray, queue_size=10)
+        self.percentage = 0.0
+        self.start_time = rospy.Time.now().to_sec()
+        self.run_finished = False
+        self.row = []
+
 
     def callback_map(self, msg):
         data = np.array(msg.data)
@@ -58,8 +64,34 @@ class Exploration_Tracker():
         percentage = Float32()
         percentage.data = (self.explored_cells*100.0)/self.exploring_size
         self.exploration_pub.publish(percentage)
+        self.percentage = percentage.data
         rospy.loginfo("Map Exploration " + str(percentage.data) + "%")
+        rospy.loginfo("ROW:"+ str(self.row))
         print(percentage)
+
+        if self.percentage >= 95.0 and not self.run_finished:
+            self.run_finished = True
+            self.save_data_from_run()
+
+    def save_data_from_run(self):
+        with open('000_results.csv', 'a+') as csvfile:
+            writer = csv.writer(csvfile, dialect='excel', delimiter=' ',
+                                    quotechar=';', quoting=csv.QUOTE_MINIMAL)
+            """
+            writer.writerow(['World'] + ['Number_Robots'] + ['Assigner'] + ['Percentage'] + ['Time'] + ['Total Distance'] +
+             ['Distance Robot_0'] + ['Distance Robot_1'] + ['Distance Robot_2']
+              + ['Distance Robot_3'] + ['Distance Robot_4'] + ['Distance Robot_5'])
+            """
+            rospy.loginfo_once("TestTrackerPath: "+str(os.path.dirname(__file__)))
+            total_distance = sum(self.traveled_distance.data)
+            row = [self.worldname, str(self.num_Robots), self.algorithmus, str("%.2f"%self.percentage), str(rospy.Time.now().to_sec()-self.start_time), str("%.2f"%total_distance), "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"]
+            for index, distance in enumerate(self.traveled_distance.data):
+                row[6+index] = ("%.2f"%distance)
+            
+            self.row = row
+            writer.writerow(row)
+
+        pass
 
 
 def main(argv, argc):

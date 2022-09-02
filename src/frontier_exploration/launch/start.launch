@@ -38,6 +38,6 @@
   </group>
 
   <!-- Start ExploringTracker-->
-  <node pkg="tests" type="exploration_tracker.py" name="ExplorationTracker" args="$(arg world) $(arg number_robots)" output="screen" />
+  <node pkg="tests" type="exploration_tracker.py" name="ExplorationTracker" args="$(arg world) $(arg number_robots) $(arg explore_algorithm)" output="screen" />
 </launch>
 

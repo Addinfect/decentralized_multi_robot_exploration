@@ -13,7 +13,7 @@ from geometry_msgs.msg import Point, Vector3
 from nav_msgs.msg import OccupancyGrid
 from functions import robot, informationGain
 from std_msgs.msg import ColorRGBA
-from frontier_exploration.msg import PointArray, RobotPosGoal, AuctionInt, AuctionFrontier
+from frontier_exploration.msg import PointArray, RobotPosGoal, AuctionInt, AuctionFrontier, AuctionBids
 from frontier_exploration.srv import RobotService
 from visualization_msgs.msg import Marker
 
@@ -64,10 +64,10 @@ class AuctionAssigner(object):
 		self.received_bids_count = 0
 
 		rospy.Subscriber("auction/start", AuctionFrontier, self.auction_start_callback)
-		rospy.Subscriber("auction/bids", AuctionInt, self.auction_bids_callback)
+		rospy.Subscriber("auction/bids", AuctionBids, self.auction_bids_callback)
 		rospy.Subscriber("auction/results", AuctionInt, self.auction_results_callback)
 		self.pub_start_auction = rospy.Publisher("auction/start", AuctionFrontier, queue_size=10)
-		self.pub_bids = rospy.Publisher("auction/bids", AuctionInt, queue_size=10)
+		self.pub_bids = rospy.Publisher("auction/bids", AuctionBids, queue_size=10)
 		self.pub_results = rospy.Publisher("auction/results", AuctionInt, queue_size=10)
 		self.pub_spare_goals = rospy.Publisher("robot_"+ str(self.robot_number) + "/spare_goals", Marker, queue_size=10)
 
@@ -105,15 +105,15 @@ class AuctionAssigner(object):
 		self.auction_is_live = False	#Auction finished
 		self.auctioneer_id = -1
 
-	def auction_bids_callback(self, msg:AuctionInt):
+	def auction_bids_callback(self, msg:AuctionBids):
 		rospy.loginfo("Receive Bid MSG my Robot_ID:" +str(self.robot_number) + str(msg))
-		if self.auction_is_live:
+		if self.auction_is_live and msg.receiver_id.data == self.robot_number:
 			if not self.bids_initialized:
-				l = len(msg.int_array.data)
+				l = len(msg.bids_array.data)
 				self.bids = [0]*self.n_robots
 				self.bids_initialized = True
 			#saves all bids from other robots
-			self.bids[msg.trasmittor_id.data] = list(msg.int_array.data)
+			self.bids[msg.trasmittor_id.data] = list(msg.bids_array.data)
 			self.received_bids_count += 1
 
 
@@ -126,15 +126,20 @@ class AuctionAssigner(object):
 				# change auctioneer
 				if self.auctioneer_id == self.robot_number:
 					self.auction_other_robot_stole_auction = True
-				self.auctioneer_id = msg.trasmittor_id.data
+			elif msg.trasmittor_id.data == self.robot_number:
+				pass
+			else:
+				return	# new id is higher --> ignore is
+		self.auctioneer_id = msg.trasmittor_id.data
 		self.auction_is_live = True
 		self.auction_points = msg.frontier_points
 		self.bid_on_points_alternative()
 
 	def bid_on_points(self):
-		bid_msg = AuctionInt()
+		bid_msg = AuctionBids()
 		bid_msg.trasmittor_id.data = self.robot_number
-		bid_msg.int_array.data = [0] * len(self.auction_points)
+		bid_msg.receiver_id.data = self.auctioneer_id
+		bid_msg.bids_array.data = [0] * len(self.auction_points)
 		cost = []
 
 		if len(self.spare_goals) < 2:
@@ -149,17 +154,21 @@ class AuctionAssigner(object):
 			cost[min_index] = 999999999999
 			sec_min_index = np.argmin(cost)
 
-			bid_msg.int_array.data[min_index] = 10
-			bid_msg.int_array.data[sec_min_index] = 5
+			bid_msg.bids_array.data[min_index] = 10
+			bid_msg.bids_array.data[sec_min_index] = 5
 
 		self.pub_bids.publish(bid_msg)
 
 	def bid_on_points_alternative(self):
 
-		bid_msg = AuctionInt()
+		bid_msg = AuctionBids()
 		bid_msg.trasmittor_id.data = self.robot_number
-		bid_msg.int_array.data = [0] * len(self.auction_points)
-		if len(self.spare_goals) < 2:
+		bid_msg.receiver_id.data = self.auctioneer_id
+		bid_msg.bids_array.data = [0] * len(self.auction_points)
+		number_bids = 2
+		if len(self.auction_points) < number_bids:
+			number_bids = len(self.auction_points)
+		if len(self.spare_goals) < number_bids:
 			points = PointArray()
 			points.points = self.auction_points
 			list_of_utilities = self.get_list_of_utilities(points)
@@ -172,12 +181,18 @@ class AuctionAssigner(object):
 			cost =[a - b \
 				for a, b in zip(list_of_sum_costs_and_frontier_occ, list_of_utilities)]
 
-			min_index = np.argmin(cost)
-			cost[min_index] = 999999999999
-			sec_min_index = np.argmin(cost)
+			
+			bid_value = 100
+			for i in range(number_bids):
+				min_index = np.argmin(cost)
+				cost[min_index] = 999999999999
+				bid_msg.bids_array.data[min_index] = int(bid_value/(i+1))
+				pass
+			
+			#sec_min_index = np.argmin(cost)
 
-			bid_msg.int_array.data[min_index] = 10
-			bid_msg.int_array.data[sec_min_index] = 5
+			
+			#bid_msg.bids_array.data[sec_min_index] = 5
 
 		self.pub_bids.publish(bid_msg)
 		
@@ -375,10 +390,13 @@ class AuctionAssigner(object):
 					rospy.sleep(1.0)
 					start_time = rospy.Time.now()
 					while(self.received_bids_count < self.n_robots):
-						rospy.loginfo("Wait for Bids")
+						rospy.loginfo("Robot_%d: Wait for Bids! Received only: %d" %(self.robot_number, self.received_bids_count))
+						if self.auction_other_robot_stole_auction:
+							break
 						if start_time+rospy.Duration(10) < rospy.Time.now():
 							self.auction_is_live = False
 							break
+						rospy.sleep(0.2)
 						pass
 
 					#check all received bids

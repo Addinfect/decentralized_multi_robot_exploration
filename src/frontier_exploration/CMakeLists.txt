@@ -28,6 +28,7 @@ add_message_files(
   RobotPosGoal.msg
   AuctionInt.msg
   AuctionFrontier.msg
+  AuctionBids.msg
  
 )
 
