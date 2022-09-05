@@ -7,7 +7,7 @@
 
   <node pkg="frontier_exploration" type="$(arg file_name)" name="robot_assigner_$(arg robot_index)" output="screen">
   <param name="map_topic" value="/map"/>
-  <param name="info_radius" value="3.0"/> 
+  <param name="info_radius" value="1.5"/> 
   <param name="frontiers_topic" value="/filtered_frontiers"/> 
   <param name="n_robots" value="$(arg number_robots)"/>
   <param name="delay_after_assignement" value="0.2"/>

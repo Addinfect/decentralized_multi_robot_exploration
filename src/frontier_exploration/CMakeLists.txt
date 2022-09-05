@@ -29,6 +29,7 @@ add_message_files(
   AuctionInt.msg
   AuctionFrontier.msg
   AuctionBids.msg
+  AuctionLog.msg
  
 )
 

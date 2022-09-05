@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 from ast import Pass
+from tracemalloc import start
 import rospy
 import sys
 import tf
 import time
 import numpy as np
 import rosservice
+from itertools import repeat
 from copy import copy
 from math import exp, hypot
 from hungarian import Hungarian
@@ -13,7 +15,7 @@ from geometry_msgs.msg import Point, Vector3
 from nav_msgs.msg import OccupancyGrid
 from functions import robot, informationGain
 from std_msgs.msg import ColorRGBA, String
-from frontier_exploration.msg import PointArray, RobotPosGoal, AuctionInt, AuctionFrontier, AuctionBids
+from frontier_exploration.msg import PointArray, RobotPosGoal, AuctionInt, AuctionFrontier, AuctionBids, AuctionLog
 from frontier_exploration.srv import RobotService
 from visualization_msgs.msg import Marker
 
@@ -72,12 +74,14 @@ class AuctionAssigner(object):
 		self.pub_bids = rospy.Publisher("auction/bids", AuctionBids, queue_size=10)
 		self.pub_results = rospy.Publisher("auction/results", AuctionInt, queue_size=10)
 		self.pub_spare_goals = rospy.Publisher("robot_"+ str(self.robot_number) + "/spare_goals", Marker, queue_size=10)
-		self.pub_log = rospy.Publisher("auction/log", String, queue_size=100)
+		self.pub_log = rospy.Publisher("auction/log", AuctionLog, queue_size=100)
 
 
 	def log(self, text:str):
-		msg = String()
-		msg.data = text
+		msg = AuctionLog()
+		time= rospy.Time.now()
+		msg.time.data = "%d,%.1d sec"%(time.secs,time.nsecs)
+		msg.text.data = "Robot_%d: "%self.robot_number + text
 		self.pub_log.publish(msg)
 
 	def map_callback(self, data):
@@ -90,7 +94,7 @@ class AuctionAssigner(object):
 	def auction_results_callback(self, msg:AuctionInt):
 		#self.spare_goals.clear() #only acutal goals are in spare
 		# add all Points where i won to the spare goal
-		self.log("Robot_%d received new Goals:"%(self.robot_number)+ "Results:" + str(msg.int_array))
+		self.log("received new Goals Results:" + str(msg.int_array))
 		for id, point in zip(msg.int_array.data,self.auction_points):
 			if id == self.robot_number:
 				self.spare_goals.append(point)
@@ -120,36 +124,39 @@ class AuctionAssigner(object):
 			self.bids[msg.trasmittor_id.data] = list(msg.bids_array.data)
 			rospy.sleep(0.1)
 			self.received_bids_count += 1
-			rospy.loginfo("Receive Bid MSG my Robot_ID:" +str(self.robot_number) + "my Bid_count is: " + str(self.received_bids_count) + str(msg))
 
 
 
 	def auction_start_callback(self, msg:AuctionFrontier):
-		rospy.loginfo("Receive Start MSG my Robot_ID:" +str(self.robot_number) + str(msg))
 		if self.auction_is_live:
 			#check lowest auctioneer number
 			if msg.trasmittor_id.data < self.auctioneer_id:
 				# change auctioneer
 				if self.auctioneer_id == self.robot_number:
 					self.auction_other_robot_stole_auction = True
-					self.log("Robot_%d: Refuse my auction, because Robot_%d started an auction too"%(self.robot_number, msg.trasmittor_id.data))
+					self.log("Refuse my auction, because Robot_%d started an auction too"%(msg.trasmittor_id.data))
 			elif msg.trasmittor_id.data == self.robot_number:
 				pass
+			elif msg.trasmittor_id.data == self.auctioneer_id:
+				pass
 			else:
+				self.log("refuse the start callback. transmittor: %d, auctioneer: %d"%(msg.trasmittor_id.data, self.auctioneer_id))
 				return	# new id is higher --> ignore is
+		self.log("is in the start callback.")
 		self.auctioneer_id = msg.trasmittor_id.data
 		self.auction_is_live = True
 		self.auction_points = msg.frontier_points
-		self.bid_on_points_alternative()
+		self.bid_on_points()
 
-	def bid_on_points_alternative(self):
-
+	def bid_on_points(self):
+		start_time = rospy.Time.now() 
 		bid_msg = AuctionBids()
 		bid_msg.trasmittor_id.data = self.robot_number
 		bid_msg.receiver_id.data = self.auctioneer_id
 		bid_msg.bids_array.data = [MIN_COST] * len(self.auction_points)
 		#set number of bids 
-		number_bids = 3
+		
+		number_bids = self.n_robots
 		if len(self.auction_points) < number_bids:
 			number_bids = len(self.auction_points)
 		
@@ -157,38 +164,56 @@ class AuctionAssigner(object):
 			points = PointArray()
 			points.points = self.auction_points
 			#Utilities (information gain)
-			list_of_utilities = self.get_list_of_utilities(points)		#information_gain
-			list_of_costs = [0] * len(self.auction_points)
-			list_of_frontier_occ = [0] * len(self.auction_points)
+			list_of_utilities = np.array(self.get_list_of_utilities(points))		#information_gain
+
+			t_diff = (rospy.Time.now()-start_time)
+			t = rospy.Time.now()
+			s = "%d,%d"%(t_diff.secs, t_diff.nsecs)
+			self.log("needed %s sec to calculate the utilites"%(s))
+			#list_of_costs = [0] * len(self.auction_points)
+			list_of_costs = np.zeros((len(self.auction_points),))
+			#list_of_frontier_occ = [0] * len(self.auction_points)
+			list_of_frontier_occ = np.zeros((len(self.auction_points),))
 			#Cost (ecledian distance)
 			me_response = self.start_new_mission(self.robot_number)
+			list_of_costs =np.array(list(map(self.calculate_cost,self.auction_points, repeat(me_response.response.position))))
+
+			t_diff = (rospy.Time.now()-t)
+			t = rospy.Time.now()
+			s = "%.2f"%(t_diff.secs)
+			self.log("needed %s sec to calculate the cost"%(s))
+
+			response = list(map(self.start_new_mission,range(self.n_robots)))
+			t_diff = (rospy.Time.now()-t)
+			t = rospy.Time.now()
+			s = "%d,%d"%(t_diff.secs, t_diff.nsecs)
+			self.log("needed %s sec to calculate the response"%(s))
+
 			for index,point in enumerate(self.auction_points):
-				list_of_costs[index] = (self.calculate_cost(point, me_response.response.position))
-
 				for i in range(self.n_robots):
-					response = self.start_new_mission(i)		#position + goal form other robots
 					# Frontier occupancy function
-					list_of_frontier_occ[index] += (self.calculate_frontier_occupancy(point, response.response.current_goal))
-				
-				
-					# Fill the current_goals dict
-					self.current_goals[i] = response.response.current_goal
-				# The weight = cost - utility + frontier_occ
-			cost =[a - b + c \
-				for a, b, c in zip(list_of_costs, list_of_utilities, list_of_frontier_occ)]
+					list_of_frontier_occ[index] += (self.calculate_frontier_occupancy(point, response[i].response.current_goal))
+		
+			t_diff = (rospy.Time.now()-t)
+			t = rospy.Time.now()
+			s = "%d,%d"%(t_diff.secs, t_diff.nsecs)
+			self.log("needed %s sec to calculate the occupany"%(s))
+			# The weight = cost - utility + frontier_occ
+			cost = (list_of_costs-list_of_utilities)+list_of_frontier_occ
 
-			
 			bid_value = 100
-			self.log("Robot_%d: Costtable:"%(self.robot_number)+str(cost))
+			self.log("Costtable:"+str(cost)+"\n\n"+str(list_of_costs)+"\n\n"+str(list_of_utilities)+"\n\n"+str(list_of_frontier_occ))
 			for i in range(number_bids):
 				min_index = np.argmin(cost)
-				self.log("Robot_%d found cheap goal index %d with total cost of %.02f (distance %.2f, util: %.2f, occupancy: %.2f"\
-					%(self.robot_number, min_index, cost[min_index],\
+				self.log("found cheap goal index %d with total cost of %.02f (distance %.2f, util: %.2f, occupancy: %.2f"\
+					%(min_index, cost[min_index],\
 					list_of_costs[min_index], list_of_utilities[min_index], list_of_frontier_occ[min_index]))
 				cost[min_index] = 999999999999
 				bid_msg.bids_array.data[min_index] = int(bid_value/(i+1))
 				pass
-
+		t = (rospy.Time.now()-start_time)
+		s = "%.d,%d"%(t.secs,t.nsecs)
+		self.log("needed %s sec to calculate the bids"%(s))
 		self.pub_bids.publish(bid_msg)
 		
 
@@ -371,10 +396,10 @@ class AuctionAssigner(object):
 			constant_frontiers = self.remove_points(mutable_centroids)
 
 			while not len(self.spare_goals):
-				self.log("Robot_%d is waiting for goals" %(self.robot_number))
+				self.log("is waiting for goals")
 				if not self.auction_is_live:
 				#publish winner & results
-					self.log("Robot_%d is starting new auction" %(self.robot_number))
+					self.log("is starting new auction")
 					self.auction_is_live = True
 					start_msg = AuctionFrontier()
 					start_msg.frontier_points = constant_frontiers.points
@@ -388,7 +413,7 @@ class AuctionAssigner(object):
 					rospy.sleep(1.0)
 					start_time = rospy.Time.now()
 					while(self.received_bids_count < self.n_robots):
-						self.log("Robot_%d is waiting for bids! received only: %d " %(self.robot_number, self.received_bids_count))
+						self.log("is waiting for bids! received only: %d " %(self.received_bids_count))
 						if self.auction_other_robot_stole_auction:
 							break
 						if start_time+rospy.Duration(15) < rospy.Time.now():
@@ -400,7 +425,7 @@ class AuctionAssigner(object):
 					#check all received bids
 					if not self.auction_other_robot_stole_auction and self.auction_is_live:
 						results = list()
-						self.log("Robot_%d Received enough bids" %(self.robot_number) + str(self.bids))
+						self.log("Received enough bids" + str(self.bids))
 						for i in range(len(self.bids[0])):		#len of bided points
 							max_cost = MIN_COST
 							max_index = -1
@@ -415,7 +440,7 @@ class AuctionAssigner(object):
 						result_msg.int_array.data = results
 
 						self.pub_results.publish(result_msg)
-						self.log("Robot_%d: publish Results to all Robots:"%(self.robot_number) + str(results) + str(self.bids))
+						self.log("publish Results to all Robots:" + str(results) + str(self.bids))
 						while(not len(self.spare_goals)):
 							pass
 					#auction finished
@@ -434,7 +459,7 @@ class AuctionAssigner(object):
 			
 			# Send robot to the goal
 			self.robots[self.robot_number].sendGoal(goal_position)
-			self.log("Robot_%d assigned to Point: " %(self.robot_number) + str(goal_position))
+			self.log("assigned to Point: " + str(goal_position))
 			rospy.sleep(self.delay_after_assignement)
 			
 			start_time = time.time()
@@ -442,7 +467,7 @@ class AuctionAssigner(object):
 			# Move until goal is reached, less that 1 meter
 			while not (self.Euclidean_distance(
 				start_position, goal_position)) < 1.0:
-				self.log("Robot_%d is running to Point: " %(self.robot_number) + str(goal_position))
+				self.log("is running to Point: " + str(goal_position))
 				# If the goal is aborted
 				if (self.robots[self.robot_number].getState() == 4):
 					print ("STATE", self.robots[self.robot_number].getState())
