@@ -7,6 +7,7 @@ import tf
 import time
 import numpy as np
 import rosservice
+from typing import Tuple
 from itertools import repeat
 from copy import copy
 from math import exp, hypot
@@ -92,7 +93,7 @@ class AuctionAssigner(object):
 		self.frontiers = data
 
 	def auction_results_callback(self, msg:AuctionInt):
-		#self.spare_goals.clear() #only acutal goals are in spare
+		self.spare_goals.clear() #only acutal goals are in spare
 		# add all Points where i won to the spare goal
 		self.log("received new Goals Results:" + str(msg.int_array))
 		for id, point in zip(msg.int_array.data,self.auction_points):
@@ -192,6 +193,8 @@ class AuctionAssigner(object):
 			for index,point in enumerate(self.auction_points):
 				for i in range(self.n_robots):
 					# Frontier occupancy function
+					if i == self.robot_number:	#is the point close to my goal, ignore the malus
+						pass
 					list_of_frontier_occ[index] += (self.calculate_frontier_occupancy(point, response[i].response.current_goal))
 		
 			t_diff = (rospy.Time.now()-t)
@@ -201,20 +204,32 @@ class AuctionAssigner(object):
 			# The weight = cost - utility + frontier_occ
 			cost = (list_of_costs-list_of_utilities)+list_of_frontier_occ
 
-			bid_value = 100
+			bid_value = 1000
 			self.log("Costtable:"+str(cost)+"\n\n"+str(list_of_costs)+"\n\n"+str(list_of_utilities)+"\n\n"+str(list_of_frontier_occ))
+			best_frontiers = []	#iindex, cost
+			sum_best_frontiers = 0.0
+
 			for i in range(number_bids):
 				min_index = np.argmin(cost)
 				self.log("found cheap goal index %d with total cost of %.02f (distance %.2f, util: %.2f, occupancy: %.2f"\
 					%(min_index, cost[min_index],\
 					list_of_costs[min_index], list_of_utilities[min_index], list_of_frontier_occ[min_index]))
-				cost[min_index] = 999999999999
-				bid_msg.bids_array.data[min_index] = int(bid_value/(i+1))
-				pass
+				best_frontiers.append((min_index,cost[min_index]))
+				sum_best_frontiers += 1/cost[min_index]
+				cost[min_index] = 999999999999	#"delete" high value --> not important anymore
+				#bid_msg.bids_array.data[min_index] = int(bid_value/(i+1))
+				
+			for index,cost in best_frontiers:
+				valuation = ((1/cost)/sum_best_frontiers)*bid_value
+				bid_msg.bids_array.data[index] = int(self.calculate_bid(valuation))
+
 		t = (rospy.Time.now()-start_time)
 		s = "%.d,%d"%(t.secs,t.nsecs)
 		self.log("needed %s sec to calculate the bids"%(s))
 		self.pub_bids.publish(bid_msg)
+
+	def calculate_bid(self, valuation:int)->float:
+		return ((self.n_robots-1)/self.n_robots)*valuation
 		
 
 
@@ -285,7 +300,7 @@ class AuctionAssigner(object):
 		
 	def calculate_cost(self, frontier_point, robot_position):
 		# Cost function for a single point = Euclidean distance
-		lambda_c = 2.5
+		lambda_c = 3.5
 		cost = lambda_c * self.Euclidean_distance(
 			frontier_point, robot_position)
 		return cost
@@ -300,7 +315,7 @@ class AuctionAssigner(object):
 	def calculate_frontier_occupancy(self, frontier_point, current_goal):
 		# Calculate frontier_occupancy_function for other mobile robots
 		# And only if the frontier point is in range radius_front_occ from current_goal
-		radius_front_occ = 8.0
+		radius_front_occ = 3.0
 		lambda_f = 20.0
 		# distance = distance from frontier_point to current_goal
 		distance = self.Euclidean_distance(frontier_point, current_goal)

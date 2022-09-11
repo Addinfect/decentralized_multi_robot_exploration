@@ -2,8 +2,8 @@
 
 global_costmap:
   
-  inflation_radius: 0.7
-  cost_scaling_factor: 10.0
+  inflation_radius: 1.0
+  cost_scaling_factor: 2.0
   #Set the global and robot frames for the costmap
   global_frame: map
   robot_base_frame: base_link

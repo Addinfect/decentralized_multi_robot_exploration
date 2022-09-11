@@ -38,8 +38,9 @@ class Exploration_Tracker():
         self.exploration_pub = rospy.Publisher('exploration_percentage', Float32, queue_size = 10)
         self.distance_pub = rospy.Publisher('traveled_distance', Float32MultiArray, queue_size=10)
         self.percentage = 0.0
-        self.start_time = rospy.Time.now().to_sec()
+        self.start_time = 0.0
         self.run_finished = False
+        self.start_time_initialized = False
         self.row = []
 
 
@@ -58,6 +59,9 @@ class Exploration_Tracker():
         distance_y = new_y-old_y
         self.traveled_distance.data[number] += math.sqrt(distance_x**2+distance_y**2)
         self.old_points[number] = (new_x, new_y)
+        if (distance_x+distance_y) > 0.1 and not self.start_time_initialized:   #Robot moved more than 0.1 meter
+            self.start_time_initialized = True
+            self.start_time = rospy.Time.now().to_sec()
     def publish_distance(self):
         self.distance_pub.publish(self.traveled_distance)
         print(self.traveled_distance)

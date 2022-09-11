@@ -16,10 +16,12 @@ trap "exit" INT
 #done
 
 
-for i in {1..10}
+for i in {1..2}
 do
     n_robots=$(((1+$RANDOM % 5)+1))
+    n_robots=6
     assigner=$((1+$RANDOM % 3))
+    assigner=3
     echo $n_robots
 
     if [[ $assigner -eq 1 ]]

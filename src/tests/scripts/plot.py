@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 df = pd.read_csv(os.path.join(os.path.expanduser('~'),'.ros/000_results.csv'), delimiter=" ")
 
-world = "office"
+world = "big_office"
 auction_2 = df.loc[(df['World']==world) & (df['Assigner']=='Auction') & (df['Number_Robots']==2)]
 auction_3 = df.loc[(df['World']==world) & (df['Assigner']=='Auction') & (df['Number_Robots']==3)]
 auction_4 = df.loc[(df['World']==world) & (df['Assigner']=='Auction') & (df['Number_Robots']==4)]
@@ -35,7 +35,7 @@ print("Hungarian Samples: 2:%d, 3:%d, 4:%d, 5:%d, 6:%d"\
        %(len(hungarian_2),len(hungarian_3),len(hungarian_4), len(hungarian_5), len(hungarian_6)))
 # plot
 D = ([auction_2['Time'].tolist(), auction_3['Time'].tolist(), auction_4['Time'].tolist(), auction_5['Time'].tolist(), auction_6['Time'].tolist()])
-E = ([auction_2['Time'].tolist(), random_2['Time'].tolist(), hungarian_2['Time'].tolist()])
+E = ([auction_3['Time'].tolist(), random_3['Time'].tolist(), hungarian_3['Time'].tolist()])
 
 
 fig, ax = plt.subplots()
@@ -58,6 +58,9 @@ VP = ax.boxplot(E, positions=[1,2,3], widths=0.5, patch_artist=True,
                 )
 
 ax.set(xlim=(0, 6), xticks=np.arange(0, 6),
-       ylim=(100, 300), yticks=np.arange(100, 300,25))
+       ylim=(50, 400), yticks=np.arange(50, 400,25))
+fig, ax = plt.subplots()
+VP = ax.plot(auction_3['Time'].tolist())
+
 
 plt.show()
