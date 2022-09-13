@@ -42,6 +42,8 @@ class Exploration_Tracker():
         self.run_finished = False
         self.start_time_initialized = False
         self.row = []
+        self.tracking_borders = [50,75,90,95,98]
+        self.actual_tracking_index = 0
 
 
     def callback_map(self, msg):
@@ -75,12 +77,15 @@ class Exploration_Tracker():
         rospy.loginfo("ROW:"+ str(self.row))
         print(percentage)
 
-        if self.percentage >= 95.0 and not self.run_finished:
-            self.run_finished = True
-            self.save_data_from_run()
+        if self.percentage >= self.tracking_borders[self.actual_tracking_index] and not self.run_finished:
+            self.save_data_from_run(self.tracking_borders[self.actual_tracking_index])
+            if(self.tracking_borders[self.actual_tracking_index] == self.tracking_borders[-1]):
+                self.run_finished = True
+            self.actual_tracking_index += 1
+            
 
-    def save_data_from_run(self):
-        with open('000_results.csv', 'a+') as csvfile:
+    def save_data_from_run(self, percentage:int):
+        with open('1_results.csv', 'a+') as csvfile:
             writer = csv.writer(csvfile, dialect='excel', delimiter=' ',
                                     quotechar=';', quoting=csv.QUOTE_MINIMAL)
             """
@@ -90,14 +95,12 @@ class Exploration_Tracker():
             """
             rospy.loginfo_once("TestTrackerPath: "+str(os.path.dirname(__file__)))
             total_distance = sum(self.traveled_distance.data)
-            row = [self.worldname, str(self.num_Robots), self.algorithmus, str("%.2f"%self.percentage), str(rospy.Time.now().to_sec()-self.start_time), str("%.2f"%total_distance), "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"]
+            row = [self.worldname, str(self.num_Robots), self.algorithmus, str(percentage), str(rospy.Time.now().to_sec()-self.start_time), str("%.2f"%total_distance), "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"]
             for index, distance in enumerate(self.traveled_distance.data):
                 row[6+index] = ("%.2f"%distance)
             
             self.row = row
             writer.writerow(row)
-
-        pass
 
 
 def main(argv, argc):

@@ -203,8 +203,10 @@ class AuctionAssigner(object):
 			self.log("needed %s sec to calculate the occupany"%(s))
 			# The weight = cost - utility + frontier_occ
 			cost = (list_of_costs-list_of_utilities)+list_of_frontier_occ
-
-			bid_value = 1000
+			rest_value = len(self.spare_goals)*300
+			bid_value = 1000-rest_value
+			if bid_value < 0:
+				bid_value = 0
 			self.log("Costtable:"+str(cost)+"\n\n"+str(list_of_costs)+"\n\n"+str(list_of_utilities)+"\n\n"+str(list_of_frontier_occ))
 			best_frontiers = []	#iindex, cost
 			sum_best_frontiers = 0.0
@@ -445,7 +447,8 @@ class AuctionAssigner(object):
 							max_cost = MIN_COST
 							max_index = -1
 							for j in range(len(self.bids)):
-								if self.bids[j][i] > max_cost and not j in results:		#every robot can get only one goal
+								#if self.bids[j][i] > max_cost and not j in results:		#every robot can get only one goal
+								if self.bids[j][i] > max_cost:
 									max_index = j
 							
 							results.append(max_index)

@@ -16,12 +16,12 @@ trap "exit" INT
 #done
 
 
-for i in {1..2}
+for i in {1..10}
 do
     n_robots=$(((1+$RANDOM % 5)+1))
-    n_robots=6
+    #n_robots=6
     assigner=$((1+$RANDOM % 3))
-    assigner=3
+    #assigner=3
     echo $n_robots
 
     if [[ $assigner -eq 1 ]]
@@ -36,7 +36,9 @@ do
     fi
     echo $algorithm
     
-    rostest tests run_percentage.test world:=big_office number_robots:=$n_robots explore_algorithm:=$algorithm
+    rostest tests run_percentage.test world:=belgioioso number_robots:=$n_robots explore_algorithm:=$algorithm
 done
+
+cp ~/.ros/1_result.csv ~/decentralized_multi_robot_exploration/
 # exit gracefully by returning a status 
 exit 0
