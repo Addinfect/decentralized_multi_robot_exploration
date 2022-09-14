@@ -16,9 +16,9 @@ trap "exit" INT
 #done
 
 
-for i in {1..10}
+for i in {1..15}
 do
-    n_robots=$(((1+$RANDOM % 5)+1))
+    n_robots=$(((1+$RANDOM % 4)+1)) #between 2 and 5
     #n_robots=6
     assigner=$((1+$RANDOM % 3))
     #assigner=3
@@ -39,6 +39,6 @@ do
     rostest tests run_percentage.test world:=belgioioso number_robots:=$n_robots explore_algorithm:=$algorithm
 done
 
-cp ~/.ros/1_result.csv ~/decentralized_multi_robot_exploration/
+cp ~/.ros/1_result.csv ~/decentralized_multi_robot_exploration/.
 # exit gracefully by returning a status 
 exit 0
