@@ -16,11 +16,11 @@ trap "exit" INT
 #done
 
 
-for i in {1..30}
+for i in {1..10}
 do
-    n_robots=$(((1+$RANDOM % 4)+1)) #between 2 and 5
-    #n_robots=6
-    assigner=$((1+$RANDOM % 3))
+    n_robots=$(((1+$RANDOM % 2)+1)) #between 2 and 5
+    n_robots=2
+    assigner=$((1+$RANDOM % 2))
     #assigner=3
     echo $n_robots
 
