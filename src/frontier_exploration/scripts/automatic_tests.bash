@@ -16,7 +16,7 @@ trap "exit" INT
 #done
 
 
-for i in {1..15}
+for i in {1..30}
 do
     n_robots=$(((1+$RANDOM % 4)+1)) #between 2 and 5
     #n_robots=6
