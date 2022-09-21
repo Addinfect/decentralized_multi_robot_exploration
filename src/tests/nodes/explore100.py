@@ -36,7 +36,7 @@ class TesterClass(unittest.TestCase):
             if not self.timestamp_set:
                 self.timestamp = rospy.Time.now().to_sec()
                 self.timestamp_set = True
-            if self.timestamp+30 <= rospy.Time.now().to_sec():
+            if self.timestamp+60 <= rospy.Time.now().to_sec():
                 self.message_received = True
 
    

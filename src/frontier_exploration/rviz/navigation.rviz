@@ -88,6 +88,14 @@ Visualization Manager:
           Value: true
         robot_2/base_link:
           Value: true
+        robot_3/base_laser_link:
+          Value: true
+        robot_3/base_link:
+          Value: true
+        robot_4/base_laser_link:
+          Value: true
+        robot_4/base_link:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -104,6 +112,12 @@ Visualization Manager:
               {}
           robot_2/base_link:
             robot_2/base_laser_link:
+              {}
+          robot_3/base_link:
+            robot_3/base_laser_link:
+              {}
+          robot_4/base_link:
+            robot_4/base_laser_link:
               {}
       Update Interval: 0
       Value: true
@@ -423,7 +437,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 19.915828704833984
+      Distance: 42.15281677246094
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -431,9 +445,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 2.0344982147216797
-        Y: 0.11666153371334076
-        Z: -0.032142579555511475
+        X: 1.8776987791061401
+        Y: 2.3397045135498047
+        Z: 0.20287923514842987
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

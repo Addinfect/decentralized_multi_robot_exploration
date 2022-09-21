@@ -24,5 +24,5 @@
     <node pkg="tests" type="resultTracker.py" name="resultTracker" output="screen" />
 
     <!-- Run Test -->
-    <test test-name="exploration1_test" pkg="tests" type="explore100.py" time-limit="360"/>
+    <test test-name="exploration1_test" pkg="tests" type="explore100.py" time-limit="480"/>
 </launch>
