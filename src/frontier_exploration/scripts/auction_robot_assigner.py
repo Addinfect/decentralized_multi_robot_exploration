@@ -4,7 +4,7 @@ from tracemalloc import start
 import rospy
 import sys
 import tf
-import time
+import time, random
 import numpy as np
 import rosservice
 from typing import Tuple
@@ -99,7 +99,7 @@ class AuctionAssigner(object):
 		for id, point in zip(msg.int_array.data,self.auction_points):
 			if id == self.robot_number:
 				self.spare_goals.append(point)
-		"""
+		
 		goals = Marker()
 		goals.header.frame_id = "map"
 		goals.header.stamp = rospy.Time.now()
@@ -112,7 +112,7 @@ class AuctionAssigner(object):
 		goals.color.a = 1.0
 		goals.points = self.spare_goals
 		self.pub_spare_goals.publish(self.spare_goals)
-		"""
+		
 		self.auction_is_live = False	#Auction finished
 		self.auctioneer_id = -1
 
@@ -203,8 +203,8 @@ class AuctionAssigner(object):
 			self.log("needed %s sec to calculate the occupany"%(s))
 			# The weight = cost - utility + frontier_occ
 			cost = (list_of_costs-list_of_utilities)+list_of_frontier_occ
-			rest_value = len(self.spare_goals)*300
-			bid_value = 1000-rest_value
+			rest_value = len(self.spare_goals)*3000
+			bid_value = 10000-rest_value
 			if bid_value < 0:
 				bid_value = 0
 			self.log("Costtable:"+str(cost)+"\n\n"+str(list_of_costs)+"\n\n"+str(list_of_utilities)+"\n\n"+str(list_of_frontier_occ))
@@ -420,9 +420,15 @@ class AuctionAssigner(object):
 					self.auction_is_live = True
 					start_msg = AuctionFrontier()
 					start_msg.frontier_points = constant_frontiers.points
+					"""
+					for point in constant_frontiers.points:
+						if self.calculate_utility(point) == 0.0:
+							constant_frontiers.points.remove(point)
+					"""
 					start_msg.trasmittor_id.data = self.robot_number
 					self.received_bids_count = 0
 					self.auction_other_robot_stole_auction = False
+					#send auction start
 					self.pub_start_auction.publish(start_msg)
 					self.auctioneer_id = self.robot_number
 					
@@ -465,6 +471,12 @@ class AuctionAssigner(object):
 					self.bids = np.zeros((1,self.n_robots))
 					self.auction_other_robot_stole_auction = False
 					self.bids_initialized = False
+				else:
+					#no goal is assigned and robot wait for auction
+					#assign random goal
+					goal = random.choice(constant_frontiers.points)
+					self.spare_goals.append(goal)
+					self.log("Assign Random Goal: " + str(goal))
 				rospy.sleep(self.delay_after_assignement)
 
 			
@@ -509,7 +521,7 @@ class AuctionAssigner(object):
 
 				# Generally, if the robot needs more than 10 seconds to 
 				# reach the goal, delete that goal
-				if (time.time() - start_time_timer) > 30.0:
+				if (time.time() - start_time_timer) > 60.0:
 					self.move_base_error_point[robot_index] = goal_position
 					print ("MORE THAN 60 SECONDS!")
 					break
@@ -522,6 +534,14 @@ class AuctionAssigner(object):
 				if not goal_position in constant_frontiers.points:
 					self.move_base_error_point[robot_index] = goal_position
 					print ("GOAL WAS EXPLORED")
+					break
+				"""
+				"""
+				# Ziel wechselt viel zu schnell
+				if (self.calculate_utility(goal_position) == 0.0):
+					self.move_base_error_point[robot_index] = goal_position
+					print ("No Information Gain")
+					self.log("No Information gain")
 					break
 				"""
 				rospy.sleep(1.0)

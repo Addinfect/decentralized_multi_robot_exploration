@@ -279,7 +279,7 @@ class RobotAssigner(object):
 
 				# Generally, if the robot needs more than 10 seconds to 
 				# reach the goal, delete that goal
-				if (time.time() - start_time_timer) > 120.0:
+				if (time.time() - start_time_timer) > 45.0:
 					self.move_base_error_point[robot_index] = goal_position
 					print ("MORE THAN 60 SECONDS!")
 					break

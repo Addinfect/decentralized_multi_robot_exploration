@@ -14,6 +14,7 @@ sns.set_theme(style="whitegrid")
 
 df_original = pd.read_csv(os.path.join(os.path.expanduser('~'),'.ros/1_results.csv'), delimiter=" ")
 
+df = df_original
 #"""
 min_distance = 15
 df = df_original.loc[(df_original['Distance_Robot_0'] >= min_distance)]
@@ -26,14 +27,14 @@ df = df.loc[(df['Distance_Robot_5'] >= min_distance) | df['Number_Robots'] < 6]
 #"""
 print(df)
 
-world = "belgioioso"
+world = "big_office"
 assigner = ["Stupid", "Hungarian", "Auction"]
 n_robots = range(2,7)
 big_office = pd.DataFrame()
 number_of_experiments = pd.DataFrame(index=[50,75,90,95,98])
 for assing_algo in assigner:
        for n in n_robots:
-              count = df.loc[(df['World']=='belgioioso') & (df["Assigner"] == assing_algo) & (df["Number_Robots"] == n)]["Percentage"].value_counts(dropna=True,sort=False)
+              count = df.loc[(df['World']==world) & (df["Assigner"] == assing_algo) & (df["Number_Robots"] == n)]["Percentage"].value_counts(dropna=True,sort=False)
               count = count.rename('%s_%d'%(assing_algo,n))
               number_of_experiments= pd.concat([number_of_experiments,count], axis=1)
 
@@ -49,26 +50,31 @@ print(number_of_experiments)
 #print(big_office.head())"""
 
 
-sns.boxplot(data=df.loc[(df['World']=='belgioioso') & (df['Percentage']==95)], x="Number_Robots",y="Time", hue="Assigner").set(title="Time @95%")
+p = sns.boxplot(data=df.loc[(df['World']==world) & (df['Percentage']==95) & (df['Number_Robots']< 6)], x="Number_Robots",y="Time", hue="Assigner")
+p.set(title="Time @95%")
+#p.legend(loc='center right', bbox_to_anchor=(1.25,0.5))
 fig = plt.figure()
-sns.boxplot(data=df.loc[(df['World']=='belgioioso') & (df['Percentage']==95)], x="Number_Robots",y="Total_Distance", hue="Assigner").set(title="Distance @95%")
+p = sns.boxplot(data=df.loc[(df['World']==world) & (df['Percentage']==95) & (df['Number_Robots']< 6)], x="Number_Robots",y="Total_Distance", hue="Assigner")
+p.set(title="Distance @95%")
+#p.legend(loc='center right', bbox_to_anchor=(1,0.5), ncol=1)
 fig = plt.figure()
-p = sns.boxplot(data=df.loc[(df['World']=='belgioioso') & (df['Assigner']=='Hungarian') & ((df['Number_Robots'] ==2 ) | (df['Number_Robots'] ==3 ) | (df['Number_Robots'] ==5 ) ) & (df['Percentage'] != 95)],y="Percentage", x="Time", hue="Number_Robots", orient="h", palette=['#b7c9e2', '#ffff81', '#fe828c'])
+p = sns.boxplot(data=df.loc[(df['World']==world) & (df['Assigner']=='Hungarian') & ((df['Number_Robots'] ==2 ) | (df['Number_Robots'] ==3 ) | (df['Number_Robots'] ==5 ) ) & (df['Percentage'] != 95)],y="Percentage", x="Time", hue="Number_Robots", orient="h", palette=['#b7c9e2', '#ffff81', '#fe828c'])
 p.set(title="Hungarian Assigner", xlabel='Time (s)', ylabel='Coverage ratio (%)', xlim=(0,350))
 p.invert_yaxis()
 
+
 fig = plt.figure()
 #anzahl an durchführungen
-#sns.boxplot(data=df.loc[(df['World']=='belgioioso') & (df['Assigner']=='Hungarian')],y="Percentage", x="Time", hue="Number_Robots", orient="h")
+#sns.boxplot(data=df.loc[(df['World']==world) & (df['Assigner']=='Hungarian')],y="Percentage", x="Time", hue="Number_Robots", orient="h")
 print(number_of_experiments.iloc[4])
 sns.barplot(data=number_of_experiments.iloc[4], orient="h")
 fig = plt.figure()
 sns.barplot(data=number_of_experiments).set(title="Number of Expiriments")
 
 fig = plt.figure()
-sns.boxplot(data=df.loc[(df['World']=='belgioioso') & (df['Percentage']==50)], x="Number_Robots",y="Time", hue="Assigner").set(title="Time @50%")
+sns.boxplot(data=df.loc[(df['World']==world) & (df['Percentage']==95)], x="Number_Robots",y="Time", hue="Assigner").set(title="Time @95%")
 fig = plt.figure()
-sns.boxplot(data=df.loc[(df['World']=='belgioioso') & (df['Percentage']==98)], x="Number_Robots",y="Time", hue="Assigner").set(title="Time @98%")
+sns.boxplot(data=df.loc[(df['World']==world) & (df['Percentage']==98)], x="Number_Robots",y="Time", hue="Assigner").set(title="Time @98%")
 
 #fig = plt.figure()
 sns.set_theme(style="whitegrid")
@@ -86,6 +92,9 @@ grid.map(sns.boxplot, "Percentage", "Time")
 grid.fig.tight_layout(w_pad=1)
 
 fig = plt.figure()
-sns.boxplot(data=df.loc[(df['World']=='hospital') & (df['Percentage']==95)], x="Number_Robots",y="Time", hue="Assigner").set(title="Hopital Distance @95%")
+sns.boxplot(data=df.loc[(df['World']=='hospital') & (df['Assigner']=='Hungarian') & (df['Number_Robots']< 6)], x="Number_Robots",y="Time", hue="Percentage").set(title="Hopital Distance @95%")
+
+fig = plt.figure()
+sns.lineplot(data=df.loc[(df['World']=='belgioioso') & (df['Assigner']=='Auction') & (df['Number_Robots']== 5)&(df['Percentage']== 95)]).set(title="Hopital Distance @95%")
 
 plt.show()

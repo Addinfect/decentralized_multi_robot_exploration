@@ -98,7 +98,7 @@ def point_of_index(mapData,i):
 	return array([x,y])
 
 def informationGain(mapData, point, r):
-	infoGain=0
+	infoGain=0.0
 	index=index_of_point(mapData,point)
 	r_region=int(r/mapData.info.resolution)
 	init_index=index-r_region*(mapData.info.width+1)	
