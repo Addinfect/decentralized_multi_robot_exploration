@@ -27,7 +27,7 @@ class Exploration_Tracker():
         elif self.worldname == "hospital":
             self.exploring_size = 563500
         elif self.worldname == "area":
-            self.exploring_size = 333333
+            self.exploring_size = 240000
 
 
         rospy.Subscriber('/map', OccupancyGrid, self.callback_map)

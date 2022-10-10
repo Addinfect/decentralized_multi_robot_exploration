@@ -309,14 +309,6 @@ pioneer3dx
 
   fancysicklaser(color "blue")
 )
-pioneer3dx
-(		  
-  #can refer to the robot by this name
-  name "pioneer2"
-  pose [2.0 0.0 0.000 -90] 
-
-  fancysicklaser(color "brown")
-)
 
 interval_sim 100
 

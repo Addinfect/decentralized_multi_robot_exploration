@@ -67,6 +67,7 @@ class AuctionAssigner(object):
 		self.auction_other_robot_stole_auction = False
 		self.bids_initialized = False
 		self.received_bids_count = 0
+		self.current_goal = None
 
 		rospy.Subscriber("auction/start", AuctionFrontier, self.auction_start_callback)
 		rospy.Subscriber("auction/bids", AuctionBids, self.auction_bids_callback)
@@ -111,7 +112,7 @@ class AuctionAssigner(object):
 		goals.color.r = 1.0
 		goals.color.a = 1.0
 		goals.points = self.spare_goals
-		self.pub_spare_goals.publish(self.spare_goals)
+		#self.pub_spare_goals.publish(self.spare_goals)
 		
 		self.auction_is_live = False	#Auction finished
 		self.auctioneer_id = -1
@@ -177,7 +178,14 @@ class AuctionAssigner(object):
 			list_of_frontier_occ = np.zeros((len(self.auction_points),))
 			#Cost (ecledian distance)
 			me_response = self.start_new_mission(self.robot_number)
-			list_of_costs =np.array(list(map(self.calculate_cost,self.auction_points, repeat(me_response.response.position))))
+			"""if len(self.spare_goals):
+				next_position = self.spare_goals[-1]
+			#elif (self.current_goal is not None):
+				#next_position = self.current_goal
+			else:"""
+			next_position = me_response.response.position
+
+			list_of_costs =np.array(list(map(self.calculate_cost,self.auction_points, repeat(next_position))))
 
 			t_diff = (rospy.Time.now()-t)
 			t = rospy.Time.now()
@@ -195,7 +203,7 @@ class AuctionAssigner(object):
 					# Frontier occupancy function
 					if i == self.robot_number:	#is the point close to my goal, ignore the malus
 						pass
-					list_of_frontier_occ[index] += (self.calculate_frontier_occupancy(point, response[i].response.current_goal))
+					list_of_frontier_occ[index] += (self.calculate_frontier_occupancy(point, response[i].response.current_goal)+self.calculate_frontier_occupancy(point, response[i].response.position))
 		
 			t_diff = (rospy.Time.now()-t)
 			t = rospy.Time.now()
@@ -302,7 +310,7 @@ class AuctionAssigner(object):
 		
 	def calculate_cost(self, frontier_point, robot_position):
 		# Cost function for a single point = Euclidean distance
-		lambda_c = 3.5
+		lambda_c = 10.0
 		cost = lambda_c * self.Euclidean_distance(
 			frontier_point, robot_position)
 		return cost
@@ -317,8 +325,8 @@ class AuctionAssigner(object):
 	def calculate_frontier_occupancy(self, frontier_point, current_goal):
 		# Calculate frontier_occupancy_function for other mobile robots
 		# And only if the frontier point is in range radius_front_occ from current_goal
-		radius_front_occ = 3.0
-		lambda_f = 20.0
+		radius_front_occ = 10.0
+		lambda_f = 10.0
 		# distance = distance from frontier_point to current_goal
 		distance = self.Euclidean_distance(frontier_point, current_goal)
 		if (distance <= radius_front_occ):
@@ -472,11 +480,18 @@ class AuctionAssigner(object):
 					self.auction_other_robot_stole_auction = False
 					self.bids_initialized = False
 				else:
-					#no goal is assigned and robot wait for auction
+
+					"""#no goal is assigned and robot wait for auction
 					#assign random goal
-					goal = random.choice(constant_frontiers.points)
+					goal = random.choice(constant_frontiers.points)"""
+					# goal with shortest distance
+					distance_cost =np.array(list(map(self.calculate_cost,self.auction_points, repeat(self.robots[self.robot_number].getPosition()))))
+					distance_cost[distance_cost < 10.0] = 999999
+					min_index = np.argmin(distance_cost)
+					goal = self.auction_points[min_index]
 					self.spare_goals.append(goal)
-					self.log("Assign Random Goal: " + str(goal))
+					#self.log("Assign Random Goal: " + str(goal))
+					self.log("Assign nearest Goal with distance of %.2f: "%distance_cost[min_index] + str(goal))
 				rospy.sleep(self.delay_after_assignement)
 
 			
@@ -491,13 +506,14 @@ class AuctionAssigner(object):
 			self.robots[self.robot_number].sendGoal(goal_position)
 			self.log("assigned to Point: " + str(goal_position))
 			rospy.sleep(self.delay_after_assignement)
+			self.current_goal = goal_position
 			
 			start_time = time.time()
 			start_time_timer = time.time()
 			# Move until goal is reached, less that 1 meter
 			while not (self.Euclidean_distance(
 				start_position, goal_position)) < 1.0:
-				self.log("is running to Point: " + str(goal_position))
+				#self.log("is running to Point: " + str(goal_position))
 				# If the goal is aborted
 				if (self.robots[self.robot_number].getState() == 4):
 					print ("STATE", self.robots[self.robot_number].getState())

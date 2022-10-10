@@ -27,7 +27,7 @@ df = df.loc[(df['Distance_Robot_5'] >= min_distance) | df['Number_Robots'] < 6]
 #"""
 print(df)
 
-world = "big_office"
+world = "area"
 assigner = ["Stupid", "Hungarian", "Auction"]
 n_robots = range(2,7)
 big_office = pd.DataFrame()
