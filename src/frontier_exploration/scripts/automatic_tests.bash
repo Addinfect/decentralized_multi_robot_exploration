@@ -21,7 +21,7 @@ do
     n_robots=$(((1+$RANDOM % 4)+1)) #between 2 and 5
     #n_robots=5
     assigner=$((1+$RANDOM % 3))
-    #assigner=2
+    assigner=4
     echo $n_robots
 
     if [[ $assigner -eq 1 ]]
@@ -33,7 +33,11 @@ do
     elif [[ $assigner -eq 3 ]]
     then
         algorithm="Auction"
+    elif [[ $assigner -eq 4 ]]
+    then
+        algorithm="Greedy"
     fi
+
     echo $algorithm
 
     #world=hospital
