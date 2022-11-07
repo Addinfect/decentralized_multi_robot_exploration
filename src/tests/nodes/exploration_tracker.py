@@ -89,7 +89,7 @@ class Exploration_Tracker():
             
 
     def save_data_from_run(self, percentage:int):
-        with open('1_results.csv', 'a+') as csvfile:
+        with open('2_results.csv', 'a+') as csvfile:
             writer = csv.writer(csvfile, dialect='excel', delimiter=' ',
                                     quotechar=';', quoting=csv.QUOTE_MINIMAL)
             """

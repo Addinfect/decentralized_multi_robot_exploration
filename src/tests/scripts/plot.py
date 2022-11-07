@@ -27,7 +27,7 @@ df = df.loc[(df['Distance_Robot_5'] >= min_distance) | df['Number_Robots'] < 6]
 #"""
 print(df)
 
-world = "belgioioso"
+world = "belgioioso"#"area"#"belgioioso"
 assigner = ["Stupid", "Hungarian", "Auction"]
 n_robots = range(2,7)
 big_office = pd.DataFrame()
@@ -92,9 +92,21 @@ grid.map(sns.boxplot, "Percentage", "Time")
 grid.fig.tight_layout(w_pad=1)
 
 fig = plt.figure()
+sns.scatterplot(data=df.loc[(df['World']==world)],x="Time",y="Total_Distance", hue="Assigner", markers="Number_Robots")
+
+fig = plt.figure()
+sns.jointplot(
+    data=df.loc[(df['World']==world)& (df['Percentage']==95)],x="Time",y="Total_Distance", hue="Assigner")
+
+#Distance per Robot
+df["distance_per_robot"]=df["Total_Distance"]/df["Number_Robots"]
+fig = plt.figure()
+sns.catplot(data=df.loc[(df['World']==world)& (df['Percentage']==95)], x="Number_Robots", y="distance_per_robot", hue="Assigner", kind="bar")
+"""
+fig = plt.figure()
 sns.boxplot(data=df.loc[(df['World']=='hospital') & (df['Assigner']=='Hungarian') & (df['Number_Robots']< 6)], x="Number_Robots",y="Time", hue="Percentage").set(title="Hopital Distance @95%")
 
 fig = plt.figure()
 sns.lineplot(data=df.loc[(df['World']=='belgioioso') & (df['Assigner']=='Auction') & (df['Number_Robots']== 5)&(df['Percentage']== 95)]).set(title="Hopital Distance @95%")
-
+"""
 plt.show()
