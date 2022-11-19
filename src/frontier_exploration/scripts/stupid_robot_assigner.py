@@ -12,7 +12,7 @@ from hungarian import Hungarian
 from geometry_msgs.msg import Point
 from nav_msgs.msg import OccupancyGrid
 from functions import robot, informationGain
-from frontier_exploration.msg import PointArray, RobotPosGoal
+from frontier_exploration.msg import PointArray, RobotPosGoal, TimeLog
 from frontier_exploration.srv import RobotService
 
 class RobotAssigner(object):
@@ -49,7 +49,21 @@ class RobotAssigner(object):
 			 str(self.robot_number), RobotService, self.handleStartmission)
 		
 		self.wait_for_all_services()
+		self.pub_time = rospy.Publisher("timing", TimeLog,queue_size=10)
 		print ("Services are ready!")
+
+	def startTimer(self):
+		self.start_time = time.time()
+
+	def timelog(self, state:str):
+		time_msg = TimeLog()
+		time_msg.state.data = state
+		t = (time.time() - self.start_time)
+		time_msg.time = t*1000#t.secs*1000000000+t.nsecs
+		
+		time_msg.id.data = str(self.robot_number)
+		self.pub_time.publish(time_msg)
+		self.startTimer()
 
 	def map_callback(self, data):
 		self.mapData = data
@@ -226,11 +240,11 @@ class RobotAssigner(object):
 	def run(self):
 
 		rospy.loginfo("Robot assigner started")
-
+		self.startTimer()
 		while not rospy.is_shutdown():
 			self.wait_for_frontiers()
 			mutable_centroids = copy(self.frontiers)
-		
+			self.timelog("StopMoving")
 			# Remove current_goals and error points form constant_frontiers	
 			constant_frontiers = self.remove_points(mutable_centroids)
 			
@@ -252,6 +266,7 @@ class RobotAssigner(object):
 			goal_position = constant_frontiers.points[goal_index]							
 			start_time = time.time()
 			start_time_timer = time.time()
+			self.timelog("StartMoving")
 			# Move until goal is reached, less that 1 meter
 			while not (self.Euclidean_distance(
 				start_position, goal_position)) < 1.0:

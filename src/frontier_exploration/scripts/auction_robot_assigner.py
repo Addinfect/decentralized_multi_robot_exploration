@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-from ast import Pass
-from tracemalloc import start
 import rospy
-import sys
-import tf
 import time, random
 import numpy as np
 import rosservice
@@ -16,7 +12,7 @@ from geometry_msgs.msg import Point, Vector3
 from nav_msgs.msg import OccupancyGrid
 from functions import robot, informationGain
 from std_msgs.msg import ColorRGBA, String
-from frontier_exploration.msg import PointArray, RobotPosGoal, AuctionInt, AuctionFrontier, AuctionBids, AuctionLog
+from frontier_exploration.msg import PointArray, RobotPosGoal, AuctionInt, AuctionFrontier, AuctionBids, AuctionLog, TimeLog
 from frontier_exploration.srv import RobotService
 from visualization_msgs.msg import Marker
 
@@ -77,7 +73,21 @@ class AuctionAssigner(object):
 		self.pub_results = rospy.Publisher("auction/results", AuctionInt, queue_size=10)
 		self.pub_spare_goals = rospy.Publisher("robot_"+ str(self.robot_number) + "/spare_goals", Marker, queue_size=10)
 		self.pub_log = rospy.Publisher("auction/log", AuctionLog, queue_size=100)
+		self.pub_time = rospy.Publisher("timing", TimeLog,queue_size=10)
 
+
+	def startTimer(self):
+		self.start_time = time.time()
+
+	def timelog(self, state:str):
+		time_msg = TimeLog()
+		time_msg.state.data = state
+		t = (time.time() - self.start_time)
+		time_msg.time = t*1000#t.secs*1000000000+t.nsecs
+		
+		time_msg.id.data = str(self.robot_number)
+		self.pub_time.publish(time_msg)
+		self.startTimer()
 
 	def log(self, text:str):
 		msg = AuctionLog()
@@ -412,7 +422,7 @@ class AuctionAssigner(object):
 	def run(self):
 
 		rospy.loginfo("Robot assigner started")
-
+		self.startTimer()
 		while not rospy.is_shutdown():
 			self.wait_for_frontiers()
 			mutable_centroids = copy(self.frontiers)
@@ -425,6 +435,7 @@ class AuctionAssigner(object):
 				if not self.auction_is_live:
 				#publish winner & results
 					self.log("is starting new auction")
+					self.timelog("Start_Auction")
 					self.auction_is_live = True
 					start_msg = AuctionFrontier()
 					start_msg.frontier_points = constant_frontiers.points
@@ -439,7 +450,7 @@ class AuctionAssigner(object):
 					#send auction start
 					self.pub_start_auction.publish(start_msg)
 					self.auctioneer_id = self.robot_number
-					
+					self.timelog("AuctionStartPublished")
 					#wait for bids
 					rospy.sleep(1.0)
 					start_time = rospy.Time.now()
@@ -455,6 +466,7 @@ class AuctionAssigner(object):
 
 					#check all received bids
 					if not self.auction_other_robot_stole_auction and self.auction_is_live:
+						self.timelog("AllBidsReceived")
 						results = list()
 						self.log("Received enough bids" + str(self.bids))
 						for i in range(len(self.bids[0])):		#len of bided points
@@ -472,6 +484,7 @@ class AuctionAssigner(object):
 						result_msg.int_array.data = results
 
 						self.pub_results.publish(result_msg)
+						self.timelog("WinnersPublished")
 						self.log("publish Results to all Robots:" + str(results) + str(self.bids))
 						while(not len(self.spare_goals)):
 							pass

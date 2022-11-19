@@ -39,5 +39,6 @@
 
   <!-- Start ExploringTracker-->
   <node pkg="tests" type="exploration_tracker.py" name="ExplorationTracker" args="$(arg world) $(arg number_robots) $(arg explore_algorithm)" output="screen" />
+  <node pkg="tests" type="timeTracker.py" name="TimeTracker" args="$(arg world) $(arg number_robots) $(arg explore_algorithm)" output="screen" />
 </launch>
 

@@ -30,6 +30,7 @@ add_message_files(
   AuctionFrontier.msg
   AuctionBids.msg
   AuctionLog.msg
+  TimeLog.msg
  
 )
 
