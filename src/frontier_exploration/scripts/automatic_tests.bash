@@ -21,7 +21,7 @@ do
     n_robots=$(((1+$RANDOM % 4)+1)) #between 2 and 5
     n_robots=$i
     assigner=$((1+$RANDOM % 4))
-    assigner=1
+    assigner=3
     echo $n_robots
 
     if [[ $assigner -eq 1 ]]
@@ -41,8 +41,8 @@ do
     echo $algorithm
 
     #world=hospital
-    #world=area
-    world=belgioioso
+    world=area
+    #world=belgioioso
     
     rostest tests run_percentage.test world:=$world number_robots:=$n_robots explore_algorithm:=$algorithm
     rostest tests run_percentage.test world:=$world number_robots:=$n_robots explore_algorithm:=$algorithm
